@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Vyzee Brasil — Admin Panel</title>
+<link rel="icon" href="../assets/icons/IconVyzee.ico">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#0a0a0a;--bg1:#111111;--bg2:#1a1a1a;--bg3:#222222;--bg4:#2a2a2a;
+  --text1:#f5f5f5;--text2:#c8c8c8;--text3:#6b6b6b;
+  --border:rgba(255,255,255,0.08);--border-md:rgba(255,255,255,0.14);--border-hi:rgba(255,255,255,0.24);
+  --green:#22c55e;--green-bg:rgba(34,197,94,0.08);--green-border:rgba(34,197,94,0.2);
+  --red:#f87171;--red-bg:rgba(248,113,113,0.08);--red-border:rgba(248,113,113,0.2);
+  --amber:#f59e0b;--amber-bg:rgba(245,158,11,0.08);--amber-border:rgba(245,158,11,0.2);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,0.08);--blue-border:rgba(96,165,250,0.2);
+  --white-dim:rgba(255,255,255,0.06);
+  --r:8px;--rLg:12px;--header-h:56px;--nav-h:44px;
+}
+html,body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh;-webkit-tap-highlight-color:transparent}
+.nx-header{position:sticky;top:0;z-index:200;background:rgba(10,10,10,0.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:var(--header-h);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nx-logo{display:flex;align-items:center;gap:10px}
+.nx-logo-wrap{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1}
+.nx-logo-wrap img{width:100%;height:100%;object-fit:contain;}
+.nx-logo-title{font-size:15px;font-weight:600;letter-spacing:.5px;color:var(--text1)}
+.nx-logo-sub{font-size:10px;color:var(--text3);letter-spacing:1.5px;display:block;margin-top:1px}
+.nx-header-right{display:flex;align-items:center;gap:8px}
+.nx-badge{background:var(--white-dim);border:1px solid var(--border-md);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:var(--text2);letter-spacing:.8px}
+.nx-date{font-size:12px;color:var(--text3)}
+.nx-sync{font-size:11px;color:var(--green);font-weight:600;cursor:pointer;border:1px solid var(--green-border);border-radius:6px;padding:5px 12px;background:var(--green-bg);transition:all .18s;font-family:inherit}
+.nx-sync:hover{background:rgba(34,197,94,0.14)}
+.nx-sync.loading{opacity:.6;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:.3}}
+.btn-logout{font-size:11px;color:var(--text3);font-weight:500;cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:5px 12px;background:transparent;transition:all .18s;font-family:inherit}
+.btn-logout:hover{color:var(--red);border-color:var(--red-border);background:var(--red-bg)}
+.nx-nav{display:flex;gap:2px;padding:6px 12px;background:var(--bg1);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;height:var(--nav-h);align-items:center}
+.nx-nav::-webkit-scrollbar{display:none}
+.nx-tab{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:none;background:transparent;color:var(--text3);font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap}
+.nx-tab:hover{color:var(--text2);background:var(--white-dim)}
+.nx-tab.active{color:#ffffff;background:var(--bg3);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.tab-label{display:inline}
+.nx-main{padding:20px;max-width:1200px;margin:0 auto;padding-bottom:40px}
+.nx-page{display:none}.nx-page.active{display:block}
+.nx-sh{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.nx-st{font-size:15px;font-weight:600;color:var(--text1)}
+.sub-st{font-size:12px;color:var(--text3);margin-top:1px}
+.reg-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:var(--bg2);border:1px solid var(--border-md);border-radius:var(--rLg);padding:16px 20px;margin-bottom:20px}
+.reg-banner-left{display:flex;align-items:center;gap:12px}
+.reg-banner-icon{width:36px;height:36px;background:var(--white-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.reg-banner-title{font-size:14px;font-weight:600;color:var(--text1)}
+.reg-banner-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.btn-reg{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;border:none;background:#ffffff;color:#000000;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none;transition:opacity .15s}
+.btn-reg:hover{opacity:.85}
+.nx-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.nx-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rLg);padding:16px;position:relative;transition:border-color .2s}
+.nx-card:hover{border-color:var(--border-md)}
+.nx-card-accent{position:absolute;top:0;left:16px;right:16px;height:1px}
+.nx-card-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.4px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.nx-card-val{font-size:22px;font-weight:600;color:var(--text1);letter-spacing:-.5px;line-height:1}
+.nx-card-val.green{color:var(--green)}.nx-card-val.red{color:var(--red)}.nx-card-val.amber{color:var(--amber)}.nx-card-val.blue{color:var(--blue)}
+.nx-tw{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rLg);overflow:hidden;margin-bottom:18px}
+.nx-tw-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nx-th{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.nx-tt{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.3px}
+table{width:100%;border-collapse:collapse;min-width:480px}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:10px 16px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--white-dim)}
+.td-dt{color:var(--text3)!important;font-size:11px!important}
+.td-green{color:var(--green)!important;font-weight:600!important}
+.td-amber{color:var(--amber)!important}
+.td-hi{color:var(--text1)!important;font-weight:500}
+.pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.4px;white-space:nowrap}
+.p-gr{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.p-or{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.p-pu{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.p-cy{background:var(--white-dim);color:var(--text2);border:1px solid var(--border-md)}
+.nx-notice{display:flex;align-items:center;gap:8px;border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:14px}
+.nx-notice.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.nx-notice.err{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.nx-mb{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:500;align-items:flex-end;justify-content:center}
+.nx-mb.open{display:flex}
+.nx-modal{background:var(--bg3);border:1px solid var(--border-md);border-radius:16px 16px 0 0;padding:24px 22px 32px;width:100%;max-width:540px;animation:slideUp .25s ease;max-height:92vh;overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:3px;background:var(--border-md);border-radius:4px;margin:0 auto 20px}
+.nx-mtitle{font-size:15px;font-weight:600;color:var(--text1);margin-bottom:14px}
+.nx-rbox{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:12px;line-height:1.9;color:var(--text2);font-family:'SF Mono',Monaco,Consolas,monospace;white-space:pre-wrap;margin-bottom:14px;max-height:260px;overflow-y:auto}
+.nx-ma{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.form-grid{display:grid;gap:12px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.nx-input{background:var(--bg1);border:1px solid var(--border-md);border-radius:7px;padding:10px 12px;color:var(--text1);font-family:inherit;font-size:13px;transition:border-color .15s;width:100%}
+.nx-input:focus{outline:none;border-color:var(--border-hi)}
+.nx-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;display:block}
+.resumo-send-status{font-size:12px;margin-top:10px;display:none;padding:8px 12px;border-radius:7px}
+.resumo-send-status.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);display:block}
+.resumo-send-status.err{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);display:block}
+.resumo-send-status.load{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber);display:block}
+.pblock{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rLg);padding:20px;margin-bottom:14px}
+.pblock-title{font-size:13px;font-weight:600;color:var(--text1);margin-bottom:14px}
+.src-status{display:flex;align-items:flex-start;gap:8px;font-size:11px;padding:8px 12px;border-radius:7px;margin-bottom:6px;line-height:1.5}
+.src-status.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.src-status.err{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.src-status.load{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+.cpd{font-size:11px;color:var(--green);font-weight:600;opacity:0;transition:opacity .3s;margin-left:4px}
+.cpd.show{opacity:1}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;border:1px solid var(--border-md);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--bg4);color:var(--text1);border-color:var(--border-hi)}
+.btn:active{transform:scale(.97)}
+.btn.g{border-color:var(--green-border);background:var(--green-bg);color:var(--green)}
+.btn.g:hover{background:rgba(34,197,94,0.14)}
+.btn.sm{padding:5px 12px;font-size:11px}
+.nx-fb{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:14px;scrollbar-width:none;padding-bottom:2px}
+.nx-fb::-webkit-scrollbar{display:none}
+.fbtn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:11px;font-weight:500;letter-spacing:.3px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap}
+.fbtn:hover{color:var(--text2);border-color:var(--border-md)}
+.fbtn.active{background:var(--bg3);color:var(--text1);border-color:var(--border-hi)}
+.nx-bc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rLg);padding:20px;margin-top:16px}
+.bc-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:16px;letter-spacing:.3px}
+.brow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.brow:last-child{margin-bottom:0}
+.blbl{font-size:11px;color:var(--text3);width:120px;flex-shrink:0}
+.btrack{flex:1;background:var(--bg4);border-radius:3px;height:6px;overflow:hidden}
+.bfill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.25,.46,.45,.94)}
+.bval{font-size:12px;font-weight:600;min-width:70px;text-align:right}
+.mobile-cards{display:none}
+.m-card{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:8px}
+.m-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.m-card-item{font-size:13px;font-weight:500;color:var(--text1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-card-profit{font-size:15px;font-weight:600;flex-shrink:0}
+.m-card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.m-card-date{font-size:10px;color:var(--text3)}
+@media(max-width:600px){
+  .nx-main{padding:12px}.nx-header{padding:0 14px}.nx-date{display:none}.tab-label{display:none}.nx-tab{padding:6px 10px}
+  .nx-metrics{grid-template-columns:1fr 1fr;gap:8px}.nx-card{padding:12px}.nx-card-val{font-size:18px}
+  .blbl{width:80px;font-size:10px}.bval{min-width:56px;font-size:11px}
+  .nx-tw-scroll table{display:none}.mobile-cards{display:block;padding:8px}
+  .form-row{grid-template-columns:1fr}.nx-modal{border-radius:14px 14px 0 0;padding:18px 16px 28px}
+  .reg-banner{flex-direction:column;align-items:flex-start}.btn-reg{width:100%;justify-content:center;text-align:center}
+}
+@media(max-width:380px){.nx-metrics{grid-template-columns:1fr 1fr}.nx-card-val{font-size:16px}}
+</style>
+</head>
+<body>
+
+<header class="nx-header">
+  <div class="nx-logo">
+    <div class="nx-logo-wrap"><img src="../assets/images/LogoVyzeeBrancaSemFundo.png" alt=""></div>
+    <div>
+      <span class="nx-logo-title">Vyzee Brasil</span>
+      <span class="nx-logo-sub">PAINEL ADMIN</span>
+    </div>
+  </div>
+  <div class="nx-header-right">
+    <span class="nx-date" id="hdate"></span>
+    <button class="nx-sync" id="sync-btn" onclick="syncAll()">↻ Sync</button>
+    <span class="nx-badge">ADMIN</span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<nav class="nx-nav">
+  <button class="nx-tab active" onclick="showTab('dashboard',this)">📊 <span class="tab-label">Dashboard</span></button>
+  <button class="nx-tab" onclick="showTab('vyperstore',this)">🐍 <span class="tab-label">VyperStore</span></button>
+  <button class="nx-tab" onclick="showTab('vyzeegamer',this)">🎮 <span class="tab-label">Periféricos</span></button>
+  <button class="nx-tab" onclick="showTab('resumo',this)">📈 <span class="tab-label">Resumo</span></button>
+  <button class="nx-tab" onclick="showTab('cupons',this)">🎟️ <span class="tab-label">Cupons</span></button>
+  <button class="nx-tab" onclick="showTab('config',this)">⚙️ <span class="tab-label">Config</span></button>
+</nav>
+
+<main class="nx-main">
+  <div class="nx-page active" id="page-dashboard">
+    <div class="nx-sh"><div><div class="nx-st">Visão Geral</div><div class="sub-st" id="last-sync">Aguardando sincronização...</div></div></div>
+    <div class="reg-banner">
+      <div class="reg-banner-left">
+        <div class="reg-banner-icon">➕</div>
+        <div><div class="reg-banner-title">Registrar nova venda</div><div class="reg-banner-sub">VyperStore, VyzeeGamer ou novo cupom</div></div>
+      </div>
+      <a href="registrar.html" class="btn-reg">⚡ Registrar venda</a>
+    </div>
+    <div id="sync-notice" style="display:none"></div>
+    <div class="nx-metrics" id="dash-metrics"></div>
+    <div class="nx-bc"><div class="bc-title">Comparativo de desempenho</div><div id="bar-chart"></div></div>
+  </div>
+
+  <div class="nx-page" id="page-vyperstore">
+    <div class="nx-sh">
+      <div class="nx-st">VyperStore — Itens de jogo</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="registrar.html" class="btn" style="text-decoration:none">➕ Registrar</a>
+        <button class="btn" onclick="openRelatModal()">📄 Relatório</button>
+      </div>
+    </div>
+    <div class="nx-metrics" id="vyper-metrics"></div>
+    <div class="nx-fb">
+      <button class="fbtn active" onclick="setFilter('todos',this)">Todos</button>
+      <button class="fbtn" onclick="setFilter('estoque_compra',this)">Compra</button>
+      <button class="fbtn" onclick="setFilter('estoque_venda',this)">Venda est.</button>
+      <button class="fbtn" onclick="setFilter('revenda_direta',this)">Revenda</button>
+      <button class="fbtn" onclick="setFilter('item_trade',this)">Trade</button>
+    </div>
+    <div class="nx-tw">
+      <div class="nx-th"><span class="nx-tt" id="vyper-count">Transações</span></div>
+      <div class="nx-tw-scroll">
+        <table><thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th>Custo</th><th>Venda</th><th>Lucro</th></tr></thead><tbody id="vyper-tbody"></tbody></table>
+        <div class="mobile-cards" id="vyper-cards"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nx-page" id="page-vyzeegamer">
+    <div class="nx-sh">
+      <div class="nx-st">VyzeeGamer — Periféricos</div>
+      <a href="registrar.html" class="btn" style="text-decoration:none">➕ Registrar</a>
+    </div>
+    <div class="nx-metrics" id="vyzee-metrics"></div>
+    <div class="nx-tw">
+      <div class="nx-th"><span class="nx-tt" id="vyzee-count">Produtos vendidos</span></div>
+      <div class="nx-tw-scroll">
+        <table><thead><tr><th>Data</th><th>Produto</th><th>Custo</th><th>Venda</th><th>Cupom</th><th>Comissão</th><th>Lucro líq.</th></tr></thead><tbody id="vyzee-tbody"></tbody></table>
+        <div class="mobile-cards" id="vyzee-cards"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nx-page" id="page-resumo">
+    <div class="nx-sh">
+      <div class="nx-st">Resumo Semanal</div>
+      <button class="btn g" onclick="openResumoModal()">💾 Salvar resumo</button>
+    </div>
+    <div class="nx-metrics" id="resumo-metrics"></div>
+    <div class="nx-tw">
+      <div class="nx-th"><span class="nx-tt" id="resumo-count">Período atual</span></div>
+      <div class="nx-tw-scroll">
+        <table><thead><tr><th>Semana</th><th>Faturamento</th><th>Lucro bruto</th><th>Comissões</th><th>Lucro líquido</th><th>Lucro Vyper</th><th>Lucro Vyzee</th></tr></thead><tbody id="resumo-tbody"></tbody></table>
+        <div class="mobile-cards" id="resumo-cards"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nx-page" id="page-cupons">
+    <div class="nx-sh">
+      <div class="nx-st">Cupons &amp; Influenciadores</div>
+      <a href="registrar.html" class="btn" style="text-decoration:none">➕ Novo cupom</a>
+    </div>
+    <div class="nx-tw">
+      <div class="nx-th"><span class="nx-tt" id="cupons-count">Cupons cadastrados</span></div>
+      <div class="nx-tw-scroll">
+        <table><thead><tr><th>Cupom</th><th>Influenciador</th></tr></thead><tbody id="cupons-tbody"></tbody></table>
+        <div class="mobile-cards" id="cupons-cards"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nx-page" id="page-config">
+    <div class="nx-sh"><div class="nx-st">Configurações</div></div>
+    <div class="pblock">
+      <div class="pblock-title">Status das fontes</div>
+      <div id="sources-status">
+        <div class="src-status load" id="st-vyperstore">VyperStore — verificando...</div>
+        <div class="src-status load" id="st-vyzeegamer">Periféricos — verificando...</div>
+        <div class="src-status load" id="st-resumo">Resumo — verificando...</div>
+        <div class="src-status load" id="st-cupons">Cupons — verificando...</div>
+      </div>
+      <button class="btn g" style="margin-top:14px" onclick="syncAll()">↻ Sincronizar agora</button>
+    </div>
+    <div class="pblock">
+      <div class="pblock-title">URL do Apps Script</div>
+      <div style="margin-bottom:12px">
+        <label class="nx-label">URL do Apps Script (GET + POST)</label>
+        <input type="text" id="inp-script-url" class="nx-input" placeholder="https://script.google.com/macros/s/.../exec">
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">Usada para buscar dados (GET) e salvar resumo (POST)</div>
+      </div>
+      <button class="btn g" onclick="saveConfig()">Salvar</button>
+      <span class="cpd" id="cpd-cfg"> Salvo!</span>
+    </div>
+  </div>
+</main>
+
+<div class="nx-mb" id="modal-relat" onclick="if(event.target===this)closeModal('modal-relat')">
+  <div class="nx-modal">
+    <div class="modal-handle"></div>
+    <div class="nx-mtitle">Relatório — VyperStore</div>
+    <div class="nx-rbox" id="report-text"></div>
+    <div class="nx-ma">
+      <button class="btn" onclick="copyReport()">📋 Copiar<span class="cpd" id="cpd"> Copiado!</span></button>
+      <button class="btn g" onclick="sendWhatsapp()">💬 WhatsApp</button>
+      <button class="btn sm" onclick="closeModal('modal-relat')" style="margin-left:auto">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="nx-mb" id="modal-resumo" onclick="if(event.target===this)closeModal('modal-resumo')">
+  <div class="nx-modal">
+    <div class="modal-handle"></div>
+    <div class="nx-mtitle">Gerar resumo semanal</div>
+    <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-size:11px;color:var(--text3);line-height:1.7">Valores calculados automaticamente. Ajuste se necessário antes de salvar.</div>
+    <div class="form-grid">
+      <div><label class="nx-label">Nome da semana</label><input type="text" id="rs-semana" class="nx-input" placeholder="ex: Semana 1 (Abr/2026)"></div>
+      <div class="form-row">
+        <div><label class="nx-label">Faturamento (R$)</label><input type="number" id="rs-faturamento" class="nx-input" step="0.01"></div>
+        <div><label class="nx-label">Lucro bruto (R$)</label><input type="number" id="rs-lucro-bruto" class="nx-input" step="0.01"></div>
+      </div>
+      <div class="form-row">
+        <div><label class="nx-label">Comissões (R$)</label><input type="number" id="rs-comissoes" class="nx-input" step="0.01"></div>
+        <div><label class="nx-label">Lucro líquido (R$)</label><input type="number" id="rs-lucro-liq" class="nx-input" step="0.01"></div>
+      </div>
+      <div class="form-row">
+        <div><label class="nx-label">Lucro Vyper (R$)</label><input type="number" id="rs-lucro-vyper" class="nx-input" step="0.01"></div>
+        <div><label class="nx-label">Lucro Vyzee (R$)</label><input type="number" id="rs-lucro-vyzee" class="nx-input" step="0.01"></div>
+      </div>
+    </div>
+    <div id="resumo-send-status" class="resumo-send-status"></div>
+    <div class="nx-ma" style="margin-top:16px">
+      <button class="btn g" onclick="enviarResumo()">💾 Salvar na planilha</button>
+      <button class="btn sm" onclick="closeModal('modal-resumo')" style="margin-left:auto">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){if(localStorage.getItem('vyzee_auth')!=='true')window.location.href='index.html';})();
+function logout(){if(confirm('Tem certeza que deseja sair?')){localStorage.removeItem('vyzee_auth');window.location.href='index.html';}}
+
+const DEFAULT_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwFIDcfpXzkwBBe96DwkJmV8Vlu1fGy3F0pe18SI3ZkGLUWoki8gDTDaX5zrIDGy4um/exec';
+let SCRIPT_URL=localStorage.getItem('nx_script_url')||DEFAULT_SCRIPT_URL;
+
+const URLS={
+  vyperstore:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=1544598065&single=true&output=csv',
+  vyzeegamer:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=538492140&single=true&output=csv',
+  resumo:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=1840855555&single=true&output=csv',
+  cupons:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=1505677446&single=true&output=csv'
+};
+
+let dados={vyperstore:[],vyzeegamer:[],resumo:[],cupons:[]};
+let activeFilter='todos';
+
+// ── Formatação ──
+const brl=v=>'R$ '+((isNaN(v)?0:v)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const centsToFloat=v=>((isNaN(v)?0:v)/100).toFixed(2);
+
+// ── Parse numérico → centavos ──
+// Aceita: "29,99" | "29.99" | número nativo | "" | null
+const num=(r,k)=>{
+  if(!r||r[k]===undefined||r[k]===null)return 0;
+  let v=String(r[k]).trim();
+  if(v===''||v==='-')return 0;
+  if(v.includes(','))v=v.replace(/\./g,'').replace(',','.');
+  const p=parseFloat(v);
+  return isNaN(p)?0:Math.round(p*100);
+};
+
+// ── Lucro líquido Vyzee ──
+// Usa campo da planilha se preenchido; senão calcula venda - custo - comissao
+const getLucroLiqVyzee=r=>{
+  const raw=String(r.lucro_liquido||'').trim();
+  if(raw!==''&&raw!=='0')return num(r,'lucro_liquido');
+  return num(r,'preco_venda')-num(r,'custo')-num(r,'comissao');
+};
+
+// ── CSV parse com _row injetado ──
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,'').trim();
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2)return[];
+  const first=lines[0];
+  const sep=first.includes('\t')?'\t':(first.split(';').length>first.split(',').length?';':',');
+  const split=line=>{
+    const res=[];let cur='',inQ=false;
+    for(let c of line){
+      if(c==='"'){inQ=!inQ;continue;}
+      if(c===sep&&!inQ){res.push(cur.trim());cur='';continue;}
+      cur+=c;
+    }
+    res.push(cur.trim());return res;
+  };
+  const headers=split(lines[0]).map(h=>h.replace(/['"]/g,'').trim());
+  return lines.slice(1).map((line,i)=>{
+    const vals=split(line),obj={_row:i+2};
+    headers.forEach((h,j)=>obj[h]=vals[j]!==undefined?vals[j].replace(/['"]/g,'').trim():'');
+    return obj;
+  }).filter(r=>Object.values(r).some((v,i)=>i>0&&v!==''));
+}
+
+// ── Deduplicação por _row (número de linha único por planilha) ──
+function dedup(lista){
+  const visto=new Set(),out=[];
+  lista.forEach((r,idx)=>{
+    // _row vem do Apps Script (linha real) ou do parseCSV acima
+    // Se por algum motivo não existir, usa o índice sequencial
+    const chave=r._row!==undefined?'row_'+String(r._row):'idx_'+String(idx);
+    if(!visto.has(chave)){visto.add(chave);out.push(r);}
+    else console.warn('Dup ignorado ['+chave+']:',r);
+  });
+  return out;
+}
+
+// ── Fetch: Apps Script com fallback para CSV público ──
+async function fetchCSV(key){
+  const el=document.getElementById('st-'+key);
+  const names={vyperstore:'VyperStore',vyzeegamer:'Periféricos',resumo:'Resumo',cupons:'Cupons'};
+  if(el){el.className='src-status load';el.textContent=names[key]+' — carregando...';}
+
+  if(SCRIPT_URL){
+    const abaMap={vyperstore:'VyperStore',vyzeegamer:'Perifericos',resumo:'Resumo',cupons:'Cupons'};
+    try{
+      const res=await fetch(SCRIPT_URL+'?aba='+encodeURIComponent(abaMap[key]),{redirect:'follow'});
+      if(res.ok){
+        const json=await res.json();
+        if(Array.isArray(json)&&json.length>0){
+          if(el){el.className='src-status ok';el.textContent='✓ '+names[key]+' — '+json.length+' registros (Apps Script)';}
+          return json; // já tem _row injetado pelo Apps Script
+        }
+      }
+    }catch(e){console.warn('Apps Script falhou:',key,e.message);}
+  }
+
+  try{
+    const res=await fetch(URLS[key]);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=parseCSV(await res.text());
+    if(el){el.className='src-status ok';el.textContent='✓ '+names[key]+' — '+data.length+' registros (CSV)';}
+    return data;
+  }catch(e){
+    if(el){el.className='src-status err';el.textContent='✗ '+names[key]+' — '+e.message;}
+    return[];
+  }
+}
+
+async function syncAll(){
+  const btn=document.getElementById('sync-btn');
+  btn.classList.add('loading');btn.textContent='↻ ...';
+  showNotice('ok','Sincronizando...');
+  const[d1,d2,d3,d4]=await Promise.all([fetchCSV('vyperstore'),fetchCSV('vyzeegamer'),fetchCSV('resumo'),fetchCSV('cupons')]);
+  dados.vyperstore=dedup(d1);
+  dados.vyzeegamer=dedup(d2);
+  dados.resumo=d3;
+  dados.cupons=d4;
+  console.log('Sync — Vyper:',dados.vyperstore.length,'| Vyzee:',dados.vyzeegamer.length,'| Resumo:',dados.resumo.length,'| Cupons:',dados.cupons.length);
+  renderAll();
+  showNotice('ok','Sync OK — Vyper: '+dados.vyperstore.length+' | Vyzee: '+dados.vyzeegamer.length);
+  setTimeout(hideNotice,5000);
+  document.getElementById('last-sync').textContent='Última sync: '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  btn.classList.remove('loading');btn.textContent='↻ Sync';
+}
+
+function showNotice(t,m){const el=document.getElementById('sync-notice');el.className='nx-notice '+t;el.style.display='flex';el.innerHTML='<span>'+m+'</span>';}
+function hideNotice(){document.getElementById('sync-notice').style.display='none';}
+
+// ── Calculators ──
+function calcVyper(d){
+  const norm=v=>(v||'').trim().toLowerCase();
+  const comp = d.filter(r => {
+  const t = norm(r.tipo_operacao);
+  return t === 'estoque_compra' || t === 'compra';
+});
+  const rev=d.filter(r=>norm(r.tipo_operacao)==='revenda_direta');
+  const vend=d.filter(r=>norm(r.tipo_operacao)==='estoque_venda');
+  const trade=d.filter(r=>norm(r.tipo_operacao)==='item_trade');
+  const sum=(arr,k)=>arr.reduce((a,r)=>a+num(r,k),0);
+  return{
+    investido:sum(comp,'custo'),
+    faturado:sum(d.filter(r=>norm(r.tipo_operacao)!=='estoque_compra'),'preco_venda'),
+    lucroTotal:sum(d,'lucro'),
+    lucroRevenda:sum(rev,'lucro'),
+    lucroEstoque:sum(vend,'lucro'),
+    lucroTrade:sum(trade,'lucro'),
+  };
+}
+function calcVyzee(d){
+  return{
+    totalVendas:d.reduce((a,r)=>{const v=num(r,'preco_venda');return a+(v>0?v:0);},0),
+    lucroTotal:d.reduce((a,r)=>a+getLucroLiqVyzee(r),0),
+    comissoes:d.reduce((a,r)=>{const c=num(r,'comissao');return a+(c>0?c:0);},0),
+  };
+}
+
+function card(icon,label,value,cls='',accent=''){
+  return`<div class="nx-card"><div class="nx-card-accent" style="background:${accent||'transparent'}"></div><div class="nx-card-label">${icon} ${label}</div><div class="nx-card-val ${cls}">${value}</div></div>`;
+}
+
+function renderDash(){
+  const m=calcVyper(dados.vyperstore),v=calcVyzee(dados.vyzeegamer);
+  const fat=m.faturado+v.totalVendas,luc=m.lucroTotal+v.lucroTotal;
+  document.getElementById('dash-metrics').innerHTML=
+    card('💰','Faturamento total',brl(fat),'','rgba(255,255,255,.15)')+
+    card('📈','Lucro total',brl(luc),'green','var(--green)')+
+    card('📦','Investido estoque',brl(m.investido),'red','var(--red)')+
+    card('🐍','Lucro VyperStore',brl(m.lucroTotal),'green','var(--green)')+
+    card('🎮','Lucro periféricos',brl(v.lucroTotal),'green','var(--green)')+
+    card('🎟️','Comissões pagas',brl(v.comissoes),'amber','var(--amber)');
+  const mx=Math.max(fat,luc,m.faturado,v.totalVendas,1);
+  document.getElementById('bar-chart').innerHTML=[
+    {l:'Faturamento total',v:fat,c:'#e5e5e5'},{l:'Lucro total',v:luc,c:'var(--green)'},
+    {l:'VyperStore fat.',v:m.faturado,c:'#e5e5e5'},{l:'Periféricos fat.',v:v.totalVendas,c:'#e5e5e5'},
+    {l:'VyperStore lucro',v:m.lucroTotal,c:'var(--green)'},{l:'Periféricos lucro',v:v.lucroTotal,c:'var(--green)'},
+  ].map(b=>`<div class="brow"><span class="blbl">${b.l}</span><div class="btrack"><div class="bfill" style="width:${(b.v/mx*100).toFixed(1)}%;background:${b.c}"></div></div><span class="bval" style="color:${b.c}">${brl(b.v)}</span></div>`).join('');
+}
+
+const PILL={estoque_compra:['p-or','Compra'],estoque_venda:['p-gr','Venda est.'],revenda_direta:['p-cy','Revenda'],item_trade:['p-pu','Trade']};
+
+function renderVyper(){
+  const m=calcVyper(dados.vyperstore);
+  document.getElementById('vyper-metrics').innerHTML=
+    card('📦','Investido',brl(m.investido),'red','var(--red)')+card('💰','Faturado',brl(m.faturado),'','rgba(255,255,255,.15)')+
+    card('📈','Lucro total',brl(m.lucroTotal),'green','var(--green)')+card('🔄','Revenda',brl(m.lucroRevenda),'green')+
+    card('📦','Estoque',brl(m.lucroEstoque),'green')+card('⚡','Trade',brl(m.lucroTrade),'');
+  const rows=activeFilter==='todos'?dados.vyperstore:dados.vyperstore.filter(r=>r.tipo_operacao===activeFilter);
+  document.getElementById('vyper-count').textContent='Transações — '+rows.length;
+  document.getElementById('vyper-tbody').innerHTML=rows.map(r=>{
+    const[pc,pl]=PILL[r.tipo_operacao]||['p-cy',r.tipo_operacao||'—'];
+    const lc=num(r,'lucro'),lcClr=lc>0?'var(--green)':lc<0?'var(--red)':'var(--text3)';
+    const lcTxt=lc>0?'+'+brl(lc):lc===0?'—':brl(lc);
+    return`<tr><td class="td-dt">${r.data||'—'}</td><td><span class="pill ${pc}">${pl}</span></td><td class="td-hi">${r.item||'—'}</td><td class="td-amber">${num(r,'custo')>0?brl(num(r,'custo')):'—'}</td><td>${num(r,'preco_venda')>0?brl(num(r,'preco_venda')):'—'}</td><td style="color:${lcClr};font-weight:600">${lcTxt}</td></tr>`;
+  }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Nenhum dado</td></tr>';
+  document.getElementById('vyper-cards').innerHTML=rows.map(r=>{
+    const[pc,pl]=PILL[r.tipo_operacao]||['p-cy',r.tipo_operacao||'—'];
+    const lc=num(r,'lucro'),lcClr=lc>0?'var(--green)':lc<0?'var(--red)':'var(--text3)';
+    const lcTxt=lc>0?'+'+brl(lc):lc===0?'—':brl(lc);
+    return`<div class="m-card"><div class="m-card-top"><span class="m-card-item">${r.item||'—'}</span><span class="m-card-profit" style="color:${lcClr}">${lcTxt}</span></div><div class="m-card-meta"><span class="pill ${pc}">${pl}</span><span class="m-card-date">${r.data||'—'}</span>${num(r,'custo')>0?`<span style="font-size:10px;color:var(--amber)">custo ${brl(num(r,'custo'))}</span>`:''}</div></div>`;
+  }).join('')||'<div style="text-align:center;color:var(--text3);padding:20px;font-size:12px">Nenhum dado</div>';
+}
+
+function renderVyzee(){
+  const v=calcVyzee(dados.vyzeegamer);
+  document.getElementById('vyzee-metrics').innerHTML=
+    card('🛒','Total vendas',brl(v.totalVendas),'','rgba(255,255,255,.15)')+card('📈','Lucro total',brl(v.lucroTotal),'green','var(--green)')+
+    card('🎟️','Comissões',brl(v.comissoes),'amber','var(--amber)')+card('📦','Itens',dados.vyzeegamer.length,'');
+  document.getElementById('vyzee-count').textContent='Produtos — '+dados.vyzeegamer.length;
+  document.getElementById('vyzee-tbody').innerHTML=dados.vyzeegamer.map(r=>{
+    const ll=getLucroLiqVyzee(r),llClr=ll>=0?'var(--green)':'var(--red)';
+    return`<tr><td class="td-dt">${r.data||'—'}</td><td class="td-hi">${r.produto||'—'}</td><td class="td-amber">${brl(num(r,'custo'))}</td><td>${brl(num(r,'preco_venda'))}</td><td><span style="color:var(--amber);font-size:11px">${r.cupom||'—'}</span></td><td class="td-amber">${brl(num(r,'comissao'))}</td><td style="color:${llClr};font-weight:600">${(ll>=0?'+':'')+brl(ll)}</td></tr>`;
+  }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Nenhum dado</td></tr>';
+  document.getElementById('vyzee-cards').innerHTML=dados.vyzeegamer.map(r=>{
+    const ll=getLucroLiqVyzee(r),llClr=ll>=0?'var(--green)':'var(--red)';
+    return`<div class="m-card"><div class="m-card-top"><span class="m-card-item">${r.produto||'—'}</span><span class="m-card-profit" style="color:${llClr}">${(ll>=0?'+':'')+brl(ll)}</span></div><div class="m-card-meta"><span class="m-card-date">${r.data||'—'}</span><span style="font-size:10px;color:var(--text2)">venda ${brl(num(r,'preco_venda'))}</span>${r.cupom?`<span style="font-size:10px;color:var(--amber)">${r.cupom}</span>`:''}</div></div>`;
+  }).join('')||'<div style="text-align:center;color:var(--text3);padding:20px;font-size:12px">Nenhum dado</div>';
+}
+
+function renderResumo(){
+  const m=calcVyper(dados.vyperstore),v=calcVyzee(dados.vyzeegamer);
+  const fat=m.faturado+v.totalVendas,luc=m.lucroTotal+v.lucroTotal;
+  document.getElementById('resumo-metrics').innerHTML=
+    card('💰','Faturamento',brl(fat),'','rgba(255,255,255,.15)')+card('📈','Lucro total',brl(luc),'green','var(--green)')+
+    card('🎟️','Comissões',brl(v.comissoes),'amber','var(--amber)')+card('🐍','Lucro Vyper',brl(m.lucroTotal),'green')+card('🎮','Lucro Vyzee',brl(v.lucroTotal),'green');
+  document.getElementById('resumo-count').textContent='Semanas — '+dados.resumo.length;
+  const rows=dados.resumo.length>0?dados.resumo:[{semana:'Período atual (calculado)',faturamento_total:fat/100,lucro_bruto:luc/100,comissoes:v.comissoes/100,lucro_liquido:(luc-v.comissoes)/100,lucro_vyper:m.lucroTotal/100,lucro_vyzee:v.lucroTotal/100}];
+  document.getElementById('resumo-tbody').innerHTML=rows.map(r=>`<tr><td class="td-hi">${r.semana||'—'}</td><td>${brl(num(r,'faturamento_total'))}</td><td>${brl(num(r,'lucro_bruto'))}</td><td class="td-amber">${brl(num(r,'comissoes'))}</td><td class="td-green">+${brl(num(r,'lucro_liquido'))}</td><td>${brl(num(r,'lucro_vyper'))}</td><td>${brl(num(r,'lucro_vyzee'))}</td></tr>`).join('');
+  document.getElementById('resumo-cards').innerHTML=rows.map(r=>`<div class="m-card"><div class="m-card-top"><span class="m-card-item">${r.semana||'—'}</span><span class="m-card-profit" style="color:var(--green)">+${brl(num(r,'lucro_liquido'))}</span></div><div class="m-card-meta"><span style="font-size:10px;color:var(--text2)">fat. ${brl(num(r,'faturamento_total'))}</span><span style="font-size:10px;color:var(--amber)">com. ${brl(num(r,'comissoes'))}</span></div></div>`).join('');
+}
+
+function renderCupons(){
+  document.getElementById('cupons-count').textContent='Cupons — '+dados.cupons.length;
+  document.getElementById('cupons-tbody').innerHTML=dados.cupons.map(r=>`<tr><td><strong style="color:var(--text1);font-weight:600">${r.cupom||'—'}</strong></td><td style="color:var(--text3)">${r.influenciador||'—'}</td></tr>`).join('')||'<tr><td colspan="2" style="text-align:center;color:var(--text3);padding:20px">Nenhum cupom</td></tr>';
+  document.getElementById('cupons-cards').innerHTML=dados.cupons.map(r=>`<div class="m-card"><div class="m-card-top"><span class="m-card-item">${r.cupom||'—'}</span></div><div class="m-card-meta"><span style="font-size:11px;color:var(--text2)">${r.influenciador||'—'}</span></div></div>`).join('')||'<div style="text-align:center;color:var(--text3);padding:20px;font-size:12px">Nenhum cupom</div>';
+}
+
+function renderAll(){renderDash();renderVyper();renderVyzee();renderResumo();renderCupons();}
+
+function showTab(id,btn){document.querySelectorAll('.nx-page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nx-tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+function setFilter(f,btn){activeFilter=f;document.querySelectorAll('.nx-fb .fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderVyper();}
+
+function openRelatModal(){
+  const m=calcVyper(dados.vyperstore);
+  document.getElementById('report-text').textContent=`Relatório Semanal — VyperStore\n${new Date().toLocaleDateString('pt-BR')}\n\n${'─'.repeat(36)}\nInvestido:        ${brl(m.investido)}\nFaturado:         ${brl(m.faturado)}\nLucro total:      ${brl(m.lucroTotal)}\n${'─'.repeat(36)}\nLucro revenda:    ${brl(m.lucroRevenda)}\nLucro estoque:    ${brl(m.lucroEstoque)}\nLucro trade:      ${brl(m.lucroTrade)}\n${'─'.repeat(36)}\nTransações: ${dados.vyperstore.filter(r=>r.tipo_operacao!=='estoque_compra').length}`;
+  document.getElementById('modal-relat').classList.add('open');
+}
+
+function openResumoModal(){
+  const m=calcVyper(dados.vyperstore),v=calcVyzee(dados.vyzeegamer);
+  const fat=m.faturado+v.totalVendas,luc=m.lucroTotal+v.lucroTotal,com=v.comissoes,hoje=new Date();
+  document.getElementById('rs-semana').value=`Semana ${getWeekNumber(hoje)} (${hoje.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}).replace('. ','/')})`;
+  document.getElementById('rs-faturamento').value=centsToFloat(fat);
+  document.getElementById('rs-lucro-bruto').value=centsToFloat(luc);
+  document.getElementById('rs-comissoes').value=centsToFloat(com);
+  document.getElementById('rs-lucro-liq').value=centsToFloat(luc-com);
+  document.getElementById('rs-lucro-vyper').value=centsToFloat(m.lucroTotal);
+  document.getElementById('rs-lucro-vyzee').value=centsToFloat(v.lucroTotal);
+  document.getElementById('resumo-send-status').className='resumo-send-status';
+  document.getElementById('modal-resumo').classList.add('open');
+}
+
+function getWeekNumber(d){const o=new Date(d.getFullYear(),0,1);return Math.ceil((((d-o)/86400000)+o.getDay()+1)/7);}
+
+async function enviarResumo(){
+  if(!SCRIPT_URL){showResumoStatus('err','URL não configurada em Config.');return;}
+  const pi=id=>{let v=document.getElementById(id).value.trim().replace(',','.');return parseFloat(v)||0;};
+  const payload={aba:'Resumo',semana:document.getElementById('rs-semana').value,faturamento_total:pi('rs-faturamento'),lucro_bruto:pi('rs-lucro-bruto'),comissoes:pi('rs-comissoes'),lucro_liquido:pi('rs-lucro-liq'),lucro_vyper:pi('rs-lucro-vyper'),lucro_vyzee:pi('rs-lucro-vyzee')};
+  showResumoStatus('load','Enviando...');
+  try{await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});showResumoStatus('ok','Resumo salvo com sucesso!');setTimeout(()=>closeModal('modal-resumo'),2500);}
+  catch(e){showResumoStatus('err','Erro: '+e.message);}
+}
+
+function showResumoStatus(t,m){const el=document.getElementById('resumo-send-status');el.className='resumo-send-status '+t;el.textContent=m;}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function copyReport(){navigator.clipboard.writeText(document.getElementById('report-text').textContent);const el=document.getElementById('cpd');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);}
+function sendWhatsapp(){window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('report-text').textContent),'_blank');}
+
+function saveConfig(){SCRIPT_URL=document.getElementById('inp-script-url').value.trim();localStorage.setItem('nx_script_url',SCRIPT_URL);const el=document.getElementById('cpd-cfg');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);}
+
+(function(){
+  document.getElementById('hdate').textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  const su=localStorage.getItem('nx_script_url');
+  if(su){SCRIPT_URL=su;document.getElementById('inp-script-url').value=su;}
+  renderAll();syncAll();
+})();
+</script>
+</body>
+</html>
