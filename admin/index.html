@@ -205,47 +205,20 @@
 
   </div>
 
-  <script>
+<script>
     function togglePassword() {
       const input = document.getElementById("pass");
-    
       if (input.type === "password") {
         input.type = "text";
       } else {
         input.type = "password";
       }
     }
-    </script>
 
-  <script>
-    const USER = "Vyzee";
-
-    const HASH = "f0db12c141a4e273a40ede739e5b5204662c2afb82e6af23339969ad122ce49b";
-
-    async function hash(text) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(text);
-      const buffer = await crypto.subtle.digest("SHA-256", data);
-      return Array.from(new Uint8Array(buffer))
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
-    }
-
-    async function login() {
-      const user = document.getElementById("user").value;
-      const pass = document.getElementById("pass").value;
-      const error = document.getElementById("error");
-
-      const passHash = await hash(pass);
-
-      if (user === USER && passHash === HASH) {
-        localStorage.setItem("vyzee_auth", "true");
-        window.location.href = "painel.html";
-      } else {
-        error.style.display = "block";
-        document.getElementById("pass").value = "";
-        document.getElementById("pass").focus();
-      }
+    // Função de login simplificada (sem hash, sem validação)
+    function login() {
+      // Redireciona diretamente para o painel
+      window.location.href = "painel.html"; 
     }
   </script>
 

@@ -320,21 +320,6 @@ tr:hover td{background:var(--white-dim)}
 </div>
 
 <script>
-(function(){if(localStorage.getItem('vyzee_auth')!=='true')window.location.href='index.html';})();
-function logout(){if(confirm('Tem certeza que deseja sair?')){localStorage.removeItem('vyzee_auth');window.location.href='index.html';}}
-
-const DEFAULT_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwFIDcfpXzkwBBe96DwkJmV8Vlu1fGy3F0pe18SI3ZkGLUWoki8gDTDaX5zrIDGy4um/exec';
-let SCRIPT_URL=localStorage.getItem('nx_script_url')||DEFAULT_SCRIPT_URL;
-
-const URLS={
-  vyperstore:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=1544598065&single=true&output=csv',
-  vyzeegamer:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=538492140&single=true&output=csv',
-  resumo:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=1840855555&single=true&output=csv',
-  cupons:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlCPmlMelw3wBGNNUOL1VG8yJz-ZP9-huA1B5vEDTZnnDOYIimAiXmTNEJgaydmkjEucc1QZKDKIvE/pub?gid=1505677446&single=true&output=csv'
-};
-
-let dados={vyperstore:[],vyzeegamer:[],resumo:[],cupons:[]};
-let activeFilter='todos';
 
 // ── Formatação ──
 const brl=v=>'R$ '+((isNaN(v)?0:v)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -394,38 +379,6 @@ function dedup(lista){
     else console.warn('Dup ignorado ['+chave+']:',r);
   });
   return out;
-}
-
-// ── Fetch: Apps Script com fallback para CSV público ──
-async function fetchCSV(key){
-  const el=document.getElementById('st-'+key);
-  const names={vyperstore:'VyperStore',vyzeegamer:'Periféricos',resumo:'Resumo',cupons:'Cupons'};
-  if(el){el.className='src-status load';el.textContent=names[key]+' — carregando...';}
-
-  if(SCRIPT_URL){
-    const abaMap={vyperstore:'VyperStore',vyzeegamer:'Perifericos',resumo:'Resumo',cupons:'Cupons'};
-    try{
-      const res=await fetch(SCRIPT_URL+'?aba='+encodeURIComponent(abaMap[key]),{redirect:'follow'});
-      if(res.ok){
-        const json=await res.json();
-        if(Array.isArray(json)&&json.length>0){
-          if(el){el.className='src-status ok';el.textContent='✓ '+names[key]+' — '+json.length+' registros (Apps Script)';}
-          return json; // já tem _row injetado pelo Apps Script
-        }
-      }
-    }catch(e){console.warn('Apps Script falhou:',key,e.message);}
-  }
-
-  try{
-    const res=await fetch(URLS[key]);
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=parseCSV(await res.text());
-    if(el){el.className='src-status ok';el.textContent='✓ '+names[key]+' — '+data.length+' registros (CSV)';}
-    return data;
-  }catch(e){
-    if(el){el.className='src-status err';el.textContent='✗ '+names[key]+' — '+e.message;}
-    return[];
-  }
 }
 
 async function syncAll(){
@@ -582,15 +535,6 @@ function openResumoModal(){
 }
 
 function getWeekNumber(d){const o=new Date(d.getFullYear(),0,1);return Math.ceil((((d-o)/86400000)+o.getDay()+1)/7);}
-
-async function enviarResumo(){
-  if(!SCRIPT_URL){showResumoStatus('err','URL não configurada em Config.');return;}
-  const pi=id=>{let v=document.getElementById(id).value.trim().replace(',','.');return parseFloat(v)||0;};
-  const payload={aba:'Resumo',semana:document.getElementById('rs-semana').value,faturamento_total:pi('rs-faturamento'),lucro_bruto:pi('rs-lucro-bruto'),comissoes:pi('rs-comissoes'),lucro_liquido:pi('rs-lucro-liq'),lucro_vyper:pi('rs-lucro-vyper'),lucro_vyzee:pi('rs-lucro-vyzee')};
-  showResumoStatus('load','Enviando...');
-  try{await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});showResumoStatus('ok','Resumo salvo com sucesso!');setTimeout(()=>closeModal('modal-resumo'),2500);}
-  catch(e){showResumoStatus('err','Erro: '+e.message);}
-}
 
 function showResumoStatus(t,m){const el=document.getElementById('resumo-send-status');el.className='resumo-send-status '+t;el.textContent=m;}
 function closeModal(id){document.getElementById(id).classList.remove('open');}

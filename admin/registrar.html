@@ -395,23 +395,6 @@ function atualizarCategoria() {
   calcLucroVyper();
 }
 
-(function(){
-  if(localStorage.getItem('vyzee_auth')!=='true'){window.location.href='index.html';}
-})();
-
-function logout(){
-  if(confirm('Tem certeza que deseja sair?')){
-    localStorage.removeItem('vyzee_auth');
-    window.location.href='index.html';
-  }
-}
-
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwFIDcfpXzkwBBe96DwkJmV8Vlu1fGy3F0pe18SI3ZkGLUWoki8gDTDaX5zrIDGy4um/exec';
-
-let modo='vyper';
-let cuponsValidos=[];
-let cupomAtualValido=false;
-
 document.getElementById('data').value=new Date().toISOString().split('T')[0];
 carregarCupons();
 
