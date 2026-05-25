@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProdSmart — Painel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), #0ea5e9);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .date-info {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-sync {
+      padding: 8px 16px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 6px;
+      color: #6ee7b7;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-sync:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-sync.loading {
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .btn-logout {
+      padding: 8px 16px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 6px;
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* MAIN */
+    .main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .btn.primary:hover {
+      background: #2563eb;
+    }
+
+    /* CARDS */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s;
+    }
+
+    .metric-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(30, 41, 59, 0.8);
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .metric-value.success { color: #6ee7b7; }
+    .metric-value.warning { color: #fcd34d; }
+    .metric-value.danger { color: #fca5a5; }
+
+    /* TABLE */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .table-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    th {
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13px;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .td-number {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+
+    .td-success { color: #6ee7b7; }
+    .td-warning { color: #fcd34d; }
+    .td-danger { color: #fca5a5; }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-dim);
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-wrap: wrap;
+      }
+
+      .date-info {
+        margin-left: 0;
+        width: 100%;
+        order: 3;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      th, td {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-icon">📊</div>
+      <span>ProdSmart</span>
+    </div>
+  </div>
+  <div class="date-info" id="date-info"></div>
+  <div class="header-right">
+    <button class="btn-sync" id="btn-sync" onclick="sincronizar()">↻ Sync</button>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- SEÇÃO: VISÃO GERAL -->
+  <div class="section-header">
+    <h1 class="section-title">Visão Geral</h1>
+    <div class="btn-group">
+      <a href="/registrar.html" class="btn primary">⚡ Registrar venda</a>
+      <button class="btn" onclick="abrirModalResumo()">💾 Salvar resumo</button>
+    </div>
+  </div>
+
+  <!-- MÉTRICAS -->
+  <div class="metrics" id="metrics">
+    <div class="loading"><div class="spinner"></div> Carregando dados...</div>
+  </div>
+
+  <!-- TABELA: VENDAS -->
+  <div class="table-container">
+    <div class="table-header">
+      <span class="table-title">Vendas recentes</span>
+    </div>
+    <table id="vendas-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Produto</th>
+          <th>Custo</th>
+          <th>Venda</th>
+          <th>Cupom</th>
+          <th>Comissão</th>
+          <th>Lucro</th>
+        </tr>
+      </thead>
+      <tbody id="vendas-tbody">
+        <tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TABELA: RESUMO SEMANAL -->
+  <div class="table-container">
+    <div class="table-header">
+      <span class="table-title">Histórico de resumos</span>
+    </div>
+    <table id="resumo-table">
+      <thead>
+        <tr>
+          <th>Semana</th>
+          <th>Faturamento</th>
+          <th>Lucro bruto</th>
+          <th>Comissões</th>
+          <th>Lucro líquido</th>
+        </tr>
+      </thead>
+      <tbody id="resumo-tbody">
+        <tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 20px;">Nenhum resumo salvo</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- MODAL: SALVAR RESUMO -->
+<div class="modal" id="modal-resumo" onclick="if(event.target === this) fecharModal('modal-resumo')">
+  <div class="modal-content">
+    <div class="modal-header">💾 Salvar Resumo Semanal</div>
+    <div class="message" id="msg-resumo"></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome da semana</label>
+        <input type="text" id="resumo-semana" placeholder="ex: Semana 1 (Mai/2026)">
+      </div>
+      <div class="form-group">
+        <label>Faturamento total (R$)</label>
+        <input type="number" id="resumo-fat" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>Lucro bruto (R$)</label>
+        <input type="number" id="resumo-lucro-bruto" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>Total comissões (R$)</label>
+        <input type="number" id="resumo-comissoes" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>Lucro líquido (R$)</label>
+        <input type="number" id="resumo-lucro-liq" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="fecharModal('modal-resumo')">Cancelar</button>
+      <button class="btn primary" id="btn-salvar-resumo" onclick="salvarResumo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = '/api';
+  let token = localStorage.getItem('auth_token');
+
+  // Verificar autenticação
+  if (!token) {
+    window.location.href = '/';
+  }
+
+  // Atualizar data
+  document.getElementById('date-info').textContent = new Date().toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  // Funções auxiliares
+  function formatarMoeda(valor) {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor);
+  }
+
+  function getHeader() {
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  }
+
+  // Carregar dados
+  async function carregarDados() {
+    try {
+      // Buscar vendas
+      const resVendas = await fetch(`${API_BASE}/vendas`, {
+        headers: getHeader()
+      });
+      const vendas = await resVendas.json();
+
+      // Buscar resumo semanal
+      const resResumo = await fetch(`${API_BASE}/resumo/semanal`, {
+        headers: getHeader()
+      });
+      const resumoAtual = await resResumo.json();
+
+      // Buscar histórico
+      const resHistorico = await fetch(`${API_BASE}/resumo/historico`, {
+        headers: getHeader()
+      });
+      const historico = await resHistorico.json();
+
+      renderizarMetricas(vendas.vendas, resumoAtual);
+      renderizarVendas(vendas.vendas);
+      renderizarResumo(historico.resumos || []);
+      preencherResumoModal(resumoAtual);
+
+    } catch (err) {
+      console.error('Erro ao carregar dados:', err);
+    }
+  }
+
+  function renderizarMetricas(vendas, resumo) {
+    const html = `
+      <div class="metric-card">
+        <div class="metric-label">💰 Faturamento</div>
+        <div class="metric-value">${formatarMoeda(resumo.faturamento_total)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">📈 Lucro bruto</div>
+        <div class="metric-value success">${formatarMoeda(resumo.lucro_bruto)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">🎟️ Comissões</div>
+        <div class="metric-value warning">${formatarMoeda(resumo.total_comissoes)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">✅ Lucro líquido</div>
+        <div class="metric-value success">${formatarMoeda(resumo.lucro_liquido)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">📊 Total vendas</div>
+        <div class="metric-value">${vendas.length}</div>
+      </div>
+    `;
+    document.getElementById('metrics').innerHTML = html;
+  }
+
+  function renderizarVendas(vendas) {
+    const tbody = document.getElementById('vendas-tbody');
+    
+    if (vendas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">Nenhuma venda registrada</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = vendas.slice(0, 10).map(v => `
+      <tr>
+        <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
+        <td>${v.produto}</td>
+        <td class="td-number">${formatarMoeda(v.custo)}</td>
+        <td class="td-number">${formatarMoeda(v.preco_venda)}</td>
+        <td>${v.cupom || '—'}</td>
+        <td class="td-number td-warning">${formatarMoeda(v.comissao)}</td>
+        <td class="td-number td-success">${formatarMoeda(v.lucro_liquido)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderizarResumo(resumos) {
+    const tbody = document.getElementById('resumo-tbody');
+    
+    if (resumos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 20px;">Nenhum resumo salvo</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = resumos.map(r => `
+      <tr>
+        <td>${r.semana}</td>
+        <td class="td-number">${formatarMoeda(r.faturamento_total)}</td>
+        <td class="td-number">${formatarMoeda(r.lucro_bruto)}</td>
+        <td class="td-number td-warning">${formatarMoeda(r.total_comissoes)}</td>
+        <td class="td-number td-success">${formatarMoeda(r.lucro_liquido)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function preencherResumoModal(resumo) {
+    const hoje = new Date();
+    const semana = Math.ceil((hoje.getDate()) / 7);
+    const mes = hoje.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+    
+    document.getElementById('resumo-semana').value = `Semana ${semana} (${mes})`;
+    document.getElementById('resumo-fat').value = (resumo.faturamento_total || 0).toFixed(2);
+    document.getElementById('resumo-lucro-bruto').value = (resumo.lucro_bruto || 0).toFixed(2);
+    document.getElementById('resumo-comissoes').value = (resumo.total_comissoes || 0).toFixed(2);
+    document.getElementById('resumo-lucro-liq').value = (resumo.lucro_liquido || 0).toFixed(2);
+  }
+
+  async function sincronizar() {
+    const btn = document.getElementById('btn-sync');
+    btn.classList.add('loading');
+    await carregarDados();
+    btn.classList.remove('loading');
+  }
+
+  function abrirModalResumo() {
+    document.getElementById('modal-resumo').classList.add('open');
+  }
+
+  function fecharModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  async function salvarResumo() {
+    const semana = document.getElementById('resumo-semana').value.trim();
+    const fat = parseFloat(document.getElementById('resumo-fat').value) || 0;
+    const bruto = parseFloat(document.getElementById('resumo-lucro-bruto').value) || 0;
+    const com = parseFloat(document.getElementById('resumo-comissoes').value) || 0;
+    const liq = parseFloat(document.getElementById('resumo-lucro-liq').value) || 0;
+
+    if (!semana || fat <= 0) {
+      mostrarMensagem('msg-resumo', 'Preencha todos os campos', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('btn-salvar-resumo');
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/resumo/salvar`, {
+        method: 'POST',
+        headers: getHeader(),
+        body: JSON.stringify({
+          semana, faturamento_total: fat, lucro_bruto: bruto,
+          total_comissoes: com, lucro_liquido: liq
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        mostrarMensagem('msg-resumo', data.erro || 'Erro ao salvar', 'error');
+      } else {
+        mostrarMensagem('msg-resumo', 'Resumo salvo com sucesso!', 'success');
+        setTimeout(() => {
+          fecharModal('modal-resumo');
+          carregarDados();
+        }, 1000);
+      }
+    } catch (err) {
+      mostrarMensagem('msg-resumo', 'Erro de conexão', 'error');
+    }
+
+    btn.disabled = false;
+  }
+
+  function mostrarMensagem(id, msg, tipo) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = `message show ${tipo}`;
+  }
+
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('usuario');
+    window.location.href = '/?logout=1';
+  }
+
+  // Carregar dados ao iniciar
+  carregarDados();
+</script>
+
+</body>
+</html>

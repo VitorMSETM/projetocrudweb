@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProdSmart — Registrar venda</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), #0ea5e9);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-back {
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-logout {
+      padding: 8px 14px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 6px;
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* MAIN */
+    .main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .tab-btn {
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* FORM */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-dim);
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 32px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* PREVIEW */
+    .preview {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .preview.show {
+      display: block;
+    }
+
+    .preview-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .preview-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #6ee7b7;
+    }
+
+    .preview.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .preview.warning .preview-value {
+      color: #fcd34d;
+    }
+
+    .preview.danger {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .preview.danger .preview-value {
+      color: #fca5a5;
+    }
+
+    /* STATUS CUPOM */
+    .cupom-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .check-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 11px;
+    }
+
+    .check-icon.valid {
+      background: rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+
+    .check-icon.invalid {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    /* BUTTONS */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--primary), #0ea5e9);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .btn-submit:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* MESSAGE */
+    .message {
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .message.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .message.loading {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fcd34d;
+    }
+
+    @media (max-width: 480px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <span>ProdSmart</span>
+  </div>
+  <div class="header-right">
+    <a href="/painel.html" class="btn-back">← Dashboard</a>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="section-title">⚡ Registrar Venda</div>
+
+  <div class="card">
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="mudarAba('venda')">📦 Venda</button>
+      <button class="tab-btn" onclick="mudarAba('cupom')">🎟️ Cupom</button>
+    </div>
+
+    <!-- MENSAGEM -->
+    <div class="message" id="message"></div>
+
+    <!-- ABA: VENDA -->
+    <div id="aba-venda" class="tab-content active">
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="data" required>
+      </div>
+
+      <div class="form-group">
+        <label>Produto / Descrição</label>
+        <input type="text" id="produto" placeholder="ex: Mouse Gamer RGB, Headset..." required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Custo (R$)</label>
+          <input type="number" id="custo" placeholder="0.00" step="0.01" min="0" oninput="calcularLucro()" required>
+        </div>
+        <div class="form-group">
+          <label>Preço venda (R$)</label>
+          <input type="number" id="preco" placeholder="0.00" step="0.01" min="0" oninput="calcularLucro()" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Cupom (opcional)</label>
+        <input type="text" id="cupom" placeholder="Deixe em branco se sem cupom" oninput="validarCupom()">
+        <div class="cupom-check" id="cupom-status" style="display: none;"></div>
+      </div>
+
+      <div class="preview" id="preview-lucro">
+        <div class="preview-label">Seu lucro (75%)</div>
+        <div class="preview-value" id="preview-valor">R$ 0,00</div>
+      </div>
+
+      <div class="preview warning" id="preview-comissao" style="display: none;">
+        <div class="preview-label">Comissão influenciador (25%)</div>
+        <div class="preview-value" id="preview-comissao-valor">R$ 0,00</div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit-venda" onclick="registrarVenda()">
+        ⚡ Registrar venda
+      </button>
+    </div>
+
+    <!-- ABA: CUPOM -->
+    <div id="aba-cupom" class="tab-content">
+      <div class="form-group">
+        <label>Código do cupom</label>
+        <input type="text" id="novo-cupom" placeholder="ex: PROMO10, BLACKFRIDAY..." required>
+      </div>
+
+      <div class="form-group">
+        <label>Nome do influenciador</label>
+        <input type="text" id="influenciador" placeholder="ex: João Silva..." required>
+      </div>
+
+      <div class="form-group">
+        <label>Comissão (%)</label>
+        <input type="number" id="comissao-perc" placeholder="25" step="0.01" min="0" max="100" value="25">
+      </div>
+
+      <button class="btn-submit" id="btn-submit-cupom" onclick="registrarCupom()">
+        🎟️ Criar cupom
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const API_BASE = '/api';
+  let token = localStorage.getItem('auth_token');
+  let cupomValido = false;
+  let cuponsValidos = [];
+
+  // Verificar autenticação
+  if (!token) {
+    window.location.href = '/';
+  }
+
+  function getHeader() {
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  }
+
+  // Definir data atual
+  document.getElementById('data').valueAsDate = new Date();
+
+  // Carregar cupons
+  async function carregarCupons() {
+    try {
+      const res = await fetch(`${API_BASE}/cupons`, {
+        headers: getHeader()
+      });
+      const data = await res.json();
+      cuponsValidos = data.cupons.map(c => c.cupom.toUpperCase());
+    } catch (err) {
+      console.error('Erro ao carregar cupons:', err);
+    }
+  }
+
+  function formatarMoeda(valor) {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor);
+  }
+
+  function calcularLucro() {
+    const custo = parseFloat(document.getElementById('custo').value) || 0;
+    const preco = parseFloat(document.getElementById('preco').value) || 0;
+    const cupom = document.getElementById('cupom').value.trim();
+
+    const lucrobruto = preco - custo;
+    const preview = document.getElementById('preview-lucro');
+    const previewComissao = document.getElementById('preview-comissao');
+
+    if (lucrobruto < 0) {
+      preview.classList.add('danger');
+      document.getElementById('preview-valor').textContent = formatarMoeda(lucrobruto);
+      document.getElementById('preview-valor').style.color = '#fca5a5';
+    } else if (lucrobruto === 0) {
+      preview.style.display = 'none';
+    } else {
+      preview.classList.remove('danger');
+      document.getElementById('preview-valor').style.color = '#6ee7b7';
+
+      if (cupom && cupomValido) {
+        const comissao = lucrobruto * 0.25;
+        const lucroLiq = lucrobruto * 0.75;
+
+        document.getElementById('preview-valor').textContent = formatarMoeda(lucroLiq);
+        document.getElementById('preview-comissao-valor').textContent = formatarMoeda(comissao);
+        previewComissao.style.display = 'block';
+      } else {
+        document.getElementById('preview-valor').textContent = formatarMoeda(lucrobruto);
+        previewComissao.style.display = 'none';
+      }
+
+      preview.style.display = 'block';
+    }
+  }
+
+  async function validarCupom() {
+    const cupom = document.getElementById('cupom').value.trim();
+    const statusEl = document.getElementById('cupom-status');
+
+    if (!cupom) {
+      cupomValido = false;
+      statusEl.style.display = 'none';
+      calcularLucro();
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/cupons/${cupom}`, {
+        headers: getHeader()
+      });
+      const data = await res.json();
+
+      cupomValido = data.valido;
+
+      if (cupomValido) {
+        statusEl.innerHTML = `
+          <div class="check-icon valid">✓</div>
+          <span style="color: #6ee7b7;">Cupom válido — ${data.cupom.influenciador}</span>
+        `;
+      } else {
+        statusEl.innerHTML = `
+          <div class="check-icon invalid">✗</div>
+          <span style="color: #fca5a5;">Cupom inválido</span>
+        `;
+      }
+
+      statusEl.style.display = 'flex';
+      calcularLucro();
+
+    } catch (err) {
+      console.error('Erro ao validar cupom:', err);
+    }
+  }
+
+  async function registrarVenda() {
+    const data = document.getElementById('data').value;
+    const produto = document.getElementById('produto').value.trim();
+    const custo = parseFloat(document.getElementById('custo').value);
+    const preco = parseFloat(document.getElementById('preco').value);
+    const cupom = document.getElementById('cupom').value.trim() || null;
+
+    if (!data || !produto || !custo || !preco) {
+      mostrarMensagem('Preencha todos os campos obrigatórios', 'error');
+      return;
+    }
+
+    if (cupom && !cupomValido) {
+      mostrarMensagem('Cupom inválido', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('btn-submit-venda');
+    btn.disabled = true;
+    mostrarMensagem('Registrando venda...', 'loading');
+
+    try {
+      const res = await fetch(`${API_BASE}/vendas`, {
+        method: 'POST',
+        headers: getHeader(),
+        body: JSON.stringify({
+          data, produto, custo, preco_venda: preco, cupom
+        })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        mostrarMensagem(result.erro || 'Erro ao registrar', 'error');
+      } else {
+        mostrarMensagem('✓ Venda registrada com sucesso!', 'success');
+        limparFormulario();
+        setTimeout(() => {
+          window.location.href = '/painel.html';
+        }, 1500);
+      }
+    } catch (err) {
+      mostrarMensagem('Erro de conexão', 'error');
+    }
+
+    btn.disabled = false;
+  }
+
+  async function registrarCupom() {
+    const cupom = document.getElementById('novo-cupom').value.trim().toUpperCase();
+    const influenciador = document.getElementById('influenciador').value.trim();
+    const comissao = parseFloat(document.getElementById('comissao-perc').value) || 25;
+
+    if (!cupom || !influenciador) {
+      mostrarMensagem('Preencha todos os campos', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('btn-submit-cupom');
+    btn.disabled = true;
+    mostrarMensagem('Criando cupom...', 'loading');
+
+    try {
+      const res = await fetch(`${API_BASE}/cupons`, {
+        method: 'POST',
+        headers: getHeader(),
+        body: JSON.stringify({
+          cupom, influenciador, comissao_percentual: comissao
+        })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        mostrarMensagem(result.erro || 'Erro ao criar', 'error');
+      } else {
+        mostrarMensagem('✓ Cupom criado com sucesso!', 'success');
+        document.getElementById('novo-cupom').value = '';
+        document.getElementById('influenciador').value = '';
+        document.getElementById('comissao-perc').value = '25';
+        carregarCupons();
+      }
+    } catch (err) {
+      mostrarMensagem('Erro de conexão', 'error');
+    }
+
+    btn.disabled = false;
+  }
+
+  function mudarAba(aba) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+    document.getElementById(`aba-${aba}`).classList.add('active');
+    event.target.classList.add('active');
+
+    mostrarMensagem('', '');
+  }
+
+  function limparFormulario() {
+    document.getElementById('produto').value = '';
+    document.getElementById('custo').value = '';
+    document.getElementById('preco').value = '';
+    document.getElementById('cupom').value = '';
+    document.getElementById('cupom-status').style.display = 'none';
+    document.getElementById('preview-lucro').style.display = 'none';
+    document.getElementById('preview-comissao').style.display = 'none';
+    cupomValido = false;
+  }
+
+  function mostrarMensagem(msg, tipo) {
+    const el = document.getElementById('message');
+    el.textContent = msg;
+    el.className = `message ${msg ? 'show ' + tipo : ''}`;
+  }
+
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('usuario');
+    window.location.href = '/?logout=1';
+  }
+
+  // Carregar cupons ao iniciar
+  carregarCupons();
+</script>
+
+</body>
+</html>
