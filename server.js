@@ -92,7 +92,7 @@ app.post('/api/login', async (req, res) => {
     res.json({ token, usuario: user.usuario });
 
   } catch (err) {
-    console.error('❌ Erro no login:', err);
+    console.error('Erro no login:', err);
     res.status(500).json({ erro: 'Erro no servidor' });
   }
 });
@@ -112,7 +112,7 @@ app.get('/api/cupons', verificarToken, async (req, res) => {
     res.json({ cupons });
 
   } catch (err) {
-    console.error('❌ Erro ao buscar cupons:', err);
+    console.error('Erro ao buscar cupons:', err);
     res.status(500).json({ erro: 'Erro ao buscar cupons' });
   }
 });
@@ -135,7 +135,7 @@ app.get('/api/cupons/:cupom', verificarToken, async (req, res) => {
     res.json({ valido: true, cupom: cupons[0] });
 
   } catch (err) {
-    console.error('❌ Erro ao validar cupom:', err);
+    console.error('Erro ao validar cupom:', err);
     res.status(500).json({ erro: 'Erro ao validar cupom' });
   }
 });
@@ -161,7 +161,7 @@ app.post('/api/cupons', verificarToken, async (req, res) => {
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ erro: 'Este cupom já existe' });
     }
-    console.error('❌ Erro ao criar cupom:', err);
+    console.error('Erro ao criar cupom:', err);
     res.status(500).json({ erro: 'Erro ao criar cupom' });
   }
 });
@@ -175,7 +175,7 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
   try {
     const { data, produto, custo, preco_venda, cupom } = req.body;
 
-    console.log('📝 Tentando registrar venda:', { data, produto, custo, preco_venda, cupom });
+    console.log('Tentando registrar venda:', { data, produto, custo, preco_venda, cupom });
 
     if (!data || !produto || custo === undefined || preco_venda === undefined) {
       return res.status(400).json({ erro: 'Campos obrigatórios faltando' });
@@ -224,7 +224,7 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
       ]
     );
 
-    console.log('✅ Venda registrada com sucesso');
+    console.log('Venda registrada com sucesso');
 
     if (conn) conn.release();
 
@@ -243,11 +243,12 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
 
   } catch (err) {
     if (conn) conn.release();
-    console.error('❌ Erro ao registrar venda:', err.message);
+    console.error('Erro ao registrar venda:', err.message);
     res.status(500).json({ erro: 'Erro ao registrar venda: ' + err.message });
   }
 });
 
+// GET todas as vendas
 app.get('/api/vendas', verificarToken, async (req, res) => {
   try {
     const conn = await pool.getConnection();
@@ -264,6 +265,139 @@ app.get('/api/vendas', verificarToken, async (req, res) => {
   } catch (err) {
     console.error('❌ Erro ao listar vendas:', err);
     res.status(500).json({ erro: 'Erro ao listar vendas' });
+  }
+});
+
+// GET uma venda específica
+app.get('/api/vendas/:id', verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const conn = await pool.getConnection();
+    const [vendas] = await conn.query(
+      `SELECT 
+        id, data, produto, custo, preco_venda, cupom, comissao, lucro_liquido
+       FROM prodsmart 
+       WHERE id = ?`,
+      [id]
+    );
+    conn.release();
+
+    if (vendas.length === 0) {
+      return res.status(404).json({ erro: 'Venda não encontrada' });
+    }
+
+    res.json({ venda: vendas[0] });
+
+  } catch (err) {
+    console.error('Erro ao buscar venda:', err);
+    res.status(500).json({ erro: 'Erro ao buscar venda' });
+  }
+});
+
+// UPDATE uma venda
+app.put('/api/vendas/:id', verificarToken, async (req, res) => {
+  let conn;
+  try {
+    const { id } = req.params;
+    const { data, produto, custo, preco_venda, cupom } = req.body;
+
+    if (!data || !produto || custo === undefined || preco_venda === undefined) {
+      return res.status(400).json({ erro: 'Campos obrigatórios faltando' });
+    }
+
+    const custoNum = parseFloat(custo);
+    const precoNum = parseFloat(preco_venda);
+    const lucro_bruto = precoNum - custoNum;
+
+    let comissao = 0;
+    let lucro_liquido = lucro_bruto;
+
+    // Validar cupom se fornecido
+    if (cupom && cupom.trim()) {
+      conn = await pool.getConnection();
+      const [cupons] = await conn.query(
+        'SELECT comissao_percentual FROM cupons WHERE UPPER(cupom) = UPPER(?) AND ativo = 1',
+        [cupom]
+      );
+
+      if (cupons.length > 0) {
+        const percentual = cupons[0].comissao_percentual / 100;
+        comissao = lucro_bruto * percentual;
+        lucro_liquido = lucro_bruto * (1 - percentual);
+      }
+    }
+
+    // Atualizar venda
+    if (!conn) conn = await pool.getConnection();
+    
+    const [result] = await conn.query(
+      `UPDATE prodsmart 
+       SET data = ?, produto = ?, custo = ?, preco_venda = ?, cupom = ?, comissao = ?, lucro_liquido = ?
+       WHERE id = ?`,
+      [
+        data,
+        produto,
+        custoNum,
+        precoNum,
+        cupom || null,
+        parseFloat(comissao.toFixed(2)),
+        parseFloat(lucro_liquido.toFixed(2)),
+        id
+      ]
+    );
+
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ erro: 'Venda não encontrada' });
+    }
+
+    res.json({
+      sucesso: true,
+      mensagem: 'Venda atualizada com sucesso',
+      dados: {
+        id,
+        produto,
+        custo: custoNum,
+        preco_venda: precoNum,
+        lucro_bruto: parseFloat(lucro_bruto.toFixed(2)),
+        comissao: parseFloat(comissao.toFixed(2)),
+        lucro_liquido: parseFloat(lucro_liquido.toFixed(2))
+      }
+    });
+
+  } catch (err) {
+    if (conn) conn.release();
+    console.error('Erro ao atualizar venda:', err);
+    res.status(500).json({ erro: 'Erro ao atualizar venda' });
+  }
+});
+
+// DELETE uma venda
+app.delete('/api/vendas/:id', verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const conn = await pool.getConnection();
+    const [result] = await conn.query(
+      'DELETE FROM prodsmart WHERE id = ?',
+      [id]
+    );
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ erro: 'Venda não encontrada' });
+    }
+
+    res.json({
+      sucesso: true,
+      mensagem: 'Venda deletada com sucesso'
+    });
+
+  } catch (err) {
+    console.error('Erro ao deletar venda:', err);
+    res.status(500).json({ erro: 'Erro ao deletar venda' });
   }
 });
 
@@ -332,7 +466,7 @@ app.get('/api/resumo/semanal', verificarToken, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('❌ Erro ao buscar resumo semanal:', err);
+    console.error('Erro ao buscar resumo semanal:', err);
     res.status(500).json({ erro: 'Erro ao buscar resumo semanal' });
   }
 });
@@ -363,7 +497,7 @@ app.post('/api/resumo/salvar', verificarToken, async (req, res) => {
     res.json({ sucesso: true, mensagem: 'Resumo salvo com sucesso' });
 
   } catch (err) {
-    console.error('❌ Erro ao salvar resumo:', err);
+    console.error('Erro ao salvar resumo:', err);
     res.status(500).json({ erro: 'Erro ao salvar resumo' });
   }
 });
@@ -373,7 +507,7 @@ app.get('/api/resumo/historico', verificarToken, async (req, res) => {
     const conn = await pool.getConnection();
     const [resumos] = await conn.query(
       `SELECT 
-        semana, faturamento_total, lucro_bruto, total_comissoes, lucro_liquido
+        id, semana, faturamento_total, lucro_bruto, total_comissoes, lucro_liquido
        FROM resumo_semanal 
        ORDER BY created_at DESC`
     );
@@ -382,8 +516,35 @@ app.get('/api/resumo/historico', verificarToken, async (req, res) => {
     res.json({ resumos });
 
   } catch (err) {
-    console.error('❌ Erro ao buscar histórico:', err);
+    console.error('Erro ao buscar histórico:', err);
     res.status(500).json({ erro: 'Erro ao buscar histórico' });
+  }
+});
+
+// DELETE um resumo semanal
+app.delete('/api/resumo/:id', verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const conn = await pool.getConnection();
+    const [result] = await conn.query(
+      'DELETE FROM resumo_semanal WHERE id = ?',
+      [id]
+    );
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ erro: 'Resumo não encontrado' });
+    }
+
+    res.json({
+      sucesso: true,
+      mensagem: 'Resumo deletado com sucesso'
+    });
+
+  } catch (err) {
+    console.error('Erro ao deletar resumo:', err);
+    res.status(500).json({ erro: 'Erro ao deletar resumo' });
   }
 });
 
@@ -402,8 +563,8 @@ app.get('/api/health', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('\n' + '='.repeat(60));
-  console.log('✅ ProdSmart rodando em http://localhost:' + PORT);
-  console.log('📊 Dashboard: http://localhost:' + PORT + '/painel.html');
-  console.log('📝 Registrar venda: http://localhost:' + PORT + '/registrar.html');
+  console.log('ProdSmart rodando em http://localhost:' + PORT);
+  console.log('Dashboard: http://localhost:' + PORT + '/painel.html');
+  console.log('Registrar venda: http://localhost:' + PORT + '/registrar.html');
   console.log('='.repeat(60) + '\n');
 });
