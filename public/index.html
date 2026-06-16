@@ -35,7 +35,6 @@
       overflow: hidden;
     }
 
-    /* Efeito de fundo animado */
     body::before {
       content: '';
       position: fixed;
@@ -330,7 +329,6 @@
 </div>
 
 <script>
-  // Alternar visibilidade da senha
   function togglePassword() {
     const input = document.getElementById('senha');
     const icon = event.target;
@@ -344,14 +342,12 @@
     }
   }
 
-  // Detectar Enter
   document.getElementById('form-login').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       handleLogin(e);
     }
   });
 
-  // Função de login
   async function handleLogin(e) {
     e.preventDefault();
 
@@ -365,7 +361,6 @@
       return;
     }
 
-    // Desabilitar botão
     btn.disabled = true;
     btn.classList.add('loading');
     btn.textContent = 'Autenticando';
@@ -389,13 +384,11 @@
         return;
       }
 
-      // Salvar token
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('usuario', data.usuario);
 
       showMessage('Login realizado com sucesso!', 'success');
       
-      // Redirecionar após 1 segundo
       setTimeout(() => {
         window.location.href = 'painel.html';
       }, 1000);
@@ -415,7 +408,6 @@
     el.className = `message ${type} show`;
   }
 
-  // Limpar token ao carregar (força novo login)
   if (window.location.search.includes('logout')) {
     localStorage.removeItem('auth_token');
     showMessage('Desconectado com sucesso', 'success');

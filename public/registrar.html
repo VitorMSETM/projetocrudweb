@@ -31,7 +31,6 @@
       min-height: 100vh;
     }
 
-    /* HEADER */
     .header {
       position: sticky;
       top: 0;
@@ -101,7 +100,6 @@
       background: rgba(239, 68, 68, 0.25);
     }
 
-    /* MAIN */
     .main {
       max-width: 600px;
       margin: 0 auto;
@@ -125,7 +123,6 @@
       margin-bottom: 24px;
     }
 
-    /* TABS */
     .tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -181,7 +178,6 @@
       }
     }
 
-    /* FORM */
     .form-group {
       margin-bottom: 18px;
     }
@@ -232,7 +228,6 @@
       gap: 12px;
     }
 
-    /* PREVIEW */
     .preview {
       background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.3);
@@ -278,7 +273,6 @@
       color: #fca5a5;
     }
 
-    /* STATUS CUPOM */
     .cupom-check {
       display: flex;
       align-items: center;
@@ -308,7 +302,6 @@
       color: #fca5a5;
     }
 
-    /* BUTTONS */
     .btn-submit {
       width: 100%;
       padding: 13px;
@@ -343,7 +336,6 @@
       cursor: not-allowed;
     }
 
-    /* MESSAGE */
     .message {
       padding: 12px;
       border-radius: 6px;
@@ -403,7 +395,6 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="header">
   <div class="logo">
     <img src="./assets/images/prodsmartlogo.png" alt="Logo" class="logo-icon">
@@ -415,7 +406,6 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <main class="main">
   <div class="section-title">
     <svg xmlns="http://www.w3.org/2000/svg"
@@ -433,7 +423,6 @@
   </div>
 
   <div class="card">
-    <!-- TABS -->
     <div class="tabs">
       <button class="tab-btn active" onclick="mudarAba('venda')">
         <svg xmlns="http://www.w3.org/2000/svg"
@@ -471,10 +460,8 @@
       </button>
     </div>
 
-    <!-- MENSAGEM -->
     <div class="message" id="message"></div>
 
-    <!-- ABA: VENDA -->
     <div id="aba-venda" class="tab-content active">
       <div class="form-group">
         <label>Data</label>
@@ -529,7 +516,6 @@
       </button>
     </div>
 
-    <!-- ABA: CUPOM -->
     <div id="aba-cupom" class="tab-content">
       <div class="form-group">
         <label>Código do cupom</label>
@@ -574,7 +560,6 @@
   let cupomValido = false;
   let cuponsValidos = [];
 
-  // Verificar autenticação
   if (!token) {
     window.location.href = '/';
   }
@@ -586,10 +571,8 @@
     };
   }
 
-  // Definir data atual
   document.getElementById('data').valueAsDate = new Date();
 
-  // Carregar cupons
   async function carregarCupons() {
     try {
       const res = await fetch(`${API_BASE}/cupons`, {
@@ -805,7 +788,6 @@
     window.location.href = '/?logout=1';
   }
 
-  // Carregar cupons ao iniciar
   carregarCupons();
 </script>
 

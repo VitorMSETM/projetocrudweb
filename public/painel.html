@@ -31,7 +31,6 @@
       min-height: 100vh;
     }
 
-    /* HEADER */
     .header {
       position: sticky;
       top: 0;
@@ -128,7 +127,6 @@
       background: rgba(239, 68, 68, 0.25);
     }
 
-    /* MAIN */
     .main {
       max-width: 1400px;
       margin: 0 auto;
@@ -209,7 +207,6 @@
       background: rgba(59, 130, 246, 0.25);
     }
 
-    /* CARDS */
     .metrics {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -249,7 +246,6 @@
     .metric-value.warning { color: #fcd34d; }
     .metric-value.danger { color: #fca5a5; }
 
-    /* TABLE */
     .table-container {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -271,6 +267,14 @@
       font-weight: 600;
     }
 
+    .filtro-badge {
+      font-size: 11px;
+      color: var(--primary);
+      background: rgba(59, 130, 246, 0.2);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -289,6 +293,14 @@
       letter-spacing: 0.5px;
       text-transform: uppercase;
       border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+
+    th:hover {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--text);
     }
 
     td {
@@ -328,7 +340,6 @@
       justify-content: flex-end;
     }
 
-    /* LOADING */
     .loading {
       text-align: center;
       padding: 40px;
@@ -345,7 +356,6 @@
       margin: 0 auto 12px;
     }
 
-    /* MODAL */
     .modal {
       display: none;
       position: fixed;
@@ -461,6 +471,96 @@
       color: #fca5a5;
     }
 
+    .filtro-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      z-index: 300;
+      min-width: 300px;
+      max-width: 400px;
+    }
+
+    .filtro-popup.open {
+      display: block;
+    }
+
+    .filtro-popup-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 250;
+    }
+
+    .filtro-popup-overlay.open {
+      display: block;
+    }
+
+    .filtro-popup-header {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filtro-popup-input {
+      width: 100%;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .filtro-popup-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .filtro-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-small:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-small.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .btn-small.primary:hover {
+      background: #2563eb;
+    }
+
     @media (max-width: 768px) {
       .header {
         flex-wrap: wrap;
@@ -493,7 +593,6 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="header">
   <div class="header-left">
     <div class="logo">
@@ -508,9 +607,7 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <main class="main">
-  <!-- SEÇÃO: VISÃO GERAL -->
   <div class="section-header">
     <h1 class="section-title">Visão Geral</h1>
     <div class="btn-group">
@@ -549,26 +646,25 @@
     </div>
   </div>
 
-  <!-- MÉTRICAS -->
   <div class="metrics" id="metrics">
     <div class="loading"><div class="spinner"></div> Carregando dados...</div>
   </div>
 
-  <!-- TABELA: VENDAS -->
   <div class="table-container">
     <div class="table-header">
       <span class="table-title">Vendas recentes</span>
+      <div id="filtro-ativo" class="filtro-badge" style="display: none;"></div>
     </div>
     <table id="vendas-table">
       <thead>
         <tr>
-          <th>Data</th>
-          <th>Produto</th>
-          <th>Custo</th>
-          <th>Venda</th>
-          <th>Cupom</th>
-          <th>Comissão</th>
-          <th>Lucro</th>
+          <th onclick="abrirFiltroColuna('data')">📅 Data</th>
+          <th onclick="abrirFiltroColuna('produto')">📦 Produto</th>
+          <th onclick="abrirFiltroColuna('custo')">💵 Custo</th>
+          <th onclick="abrirFiltroColuna('preco')">💰 Venda</th>
+          <th onclick="abrirFiltroColuna('cupom')">🎟️ Cupom</th>
+          <th onclick="abrirFiltroColuna('comissao')">🤝 Comissão</th>
+          <th onclick="abrirFiltroColuna('lucro')">✓ Lucro</th>
           <th style="text-align: right;">Ações</th>
         </tr>
       </thead>
@@ -578,7 +674,6 @@
     </table>
   </div>
 
-  <!-- TABELA: RESUMO SEMANAL -->
   <div class="table-container">
     <div class="table-header">
       <span class="table-title">Histórico de resumos</span>
@@ -601,7 +696,19 @@
   </div>
 </main>
 
-<!-- MODAL: SALVAR RESUMO -->
+<div class="filtro-popup-overlay" id="filtro-overlay" onclick="fecharFiltro()"></div>
+<div class="filtro-popup" id="filtro-popup">
+  <div class="filtro-popup-header">
+    <span id="filtro-titulo">Filtrar por Data</span>
+    <span onclick="fecharFiltro()" style="cursor: pointer; margin-left: auto; font-size: 20px;">✕</span>
+  </div>
+  <input type="text" id="filtro-input" class="filtro-popup-input" placeholder="Digite aqui...">
+  <div class="filtro-buttons">
+    <button class="btn-small" onclick="fecharFiltro()">Cancelar</button>
+    <button class="btn-small primary" onclick="aplicarFiltro()">Filtrar</button>
+  </div>
+</div>
+
 <div class="modal" id="modal-resumo" onclick="if(event.target === this) fecharModal('modal-resumo')">
   <div class="modal-content">
     <div class="modal-header">
@@ -651,7 +758,6 @@
   </div>
 </div>
 
-<!-- MODAL: EDITAR VENDA -->
 <div class="modal" id="modal-editar" onclick="if(event.target === this) fecharModal('modal-editar')">
   <div class="modal-content">
     <div class="modal-header">
@@ -701,7 +807,6 @@
   </div>
 </div>
 
-<!-- MODAL: CONFIRMAR EXCLUSÃO -->
 <div class="modal" id="modal-deletar" onclick="if(event.target === this) fecharModal('modal-deletar')">
   <div class="modal-content">
 <div class="modal-header">
@@ -733,7 +838,6 @@
   </div>
 </div>
 
-<!-- MODAL: CONFIRMAR EXCLUSÃO DE RESUMO -->
 <div class="modal" id="modal-deletar-resumo" onclick="if(event.target === this) fecharModal('modal-deletar-resumo')">
   <div class="modal-content">
 <div class="modal-header">
@@ -768,20 +872,22 @@
 <script>
   const API_BASE = '/api';
   let token = localStorage.getItem('auth_token');
+  
+  let todasAsVendas = [];
+  let vendasExibidas = [];
+  let filtroAtivo = null;
+  let valorFiltro = null;
 
-  // Verificar autenticação
   if (!token) {
     window.location.href = '/';
   }
 
-  // Atualizar data
   document.getElementById('date-info').textContent = new Date().toLocaleDateString('pt-BR', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
 
-  // Funções auxiliares
   function formatarMoeda(valor) {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -796,29 +902,28 @@
     };
   }
 
-  // Carregar dados
   async function carregarDados() {
     try {
-      // Buscar vendas
       const resVendas = await fetch(`${API_BASE}/vendas`, {
         headers: getHeader()
       });
       const vendas = await resVendas.json();
 
-      // Buscar resumo semanal
       const resResumo = await fetch(`${API_BASE}/resumo/semanal`, {
         headers: getHeader()
       });
       const resumoAtual = await resResumo.json();
 
-      // Buscar histórico
       const resHistorico = await fetch(`${API_BASE}/resumo/historico`, {
         headers: getHeader()
       });
       const historico = await resHistorico.json();
 
-      renderizarMetricas(vendas.vendas, resumoAtual);
-      renderizarVendas(vendas.vendas);
+      todasAsVendas = vendas.vendas || [];
+      vendasExibidas = [...todasAsVendas];
+
+      renderizarMetricas(todasAsVendas, resumoAtual);
+      renderizarVendas(vendasExibidas);
       renderizarResumo(historico.resumos || []);
       preencherResumoModal(resumoAtual);
 
@@ -925,7 +1030,7 @@
   </svg>
   Total vendas
 </div>
-        <div class="metric-value">${vendas.length}</div>
+        <div class="metric-value">${todasAsVendas.length}</div>
       </div>
     `;
     document.getElementById('metrics').innerHTML = html;
@@ -939,7 +1044,7 @@
       return;
     }
 
-    tbody.innerHTML = vendas.slice(0, 10).map(v => `
+    tbody.innerHTML = vendas.map(v => `
       <tr>
         <td class="td-text">${new Date(v.data).toLocaleDateString('pt-BR')}</td>
         <td class="td-text">${v.produto}</td>
@@ -1056,7 +1161,87 @@
     document.getElementById(id).classList.remove('open');
   }
 
-  // ============ EDITAR VENDA ============
+  function abrirFiltroColuna(coluna) {
+    const titulos = {
+      'data': '🗓️ Filtrar por Data',
+      'produto': '📦 Filtrar por Produto',
+      'custo': '💵 Filtrar por Custo',
+      'preco': '💰 Filtrar por Preço de Venda',
+      'cupom': '🎟️ Filtrar por Cupom',
+      'comissao': '🤝 Filtrar por Comissão',
+      'lucro': '✓ Filtrar por Lucro'
+    };
+
+    filtroAtivo = coluna;
+    document.getElementById('filtro-titulo').textContent = titulos[coluna] || 'Filtrar';
+    document.getElementById('filtro-input').value = '';
+    document.getElementById('filtro-input').placeholder = `Digite para filtrar ${coluna}...`;
+    
+    document.getElementById('filtro-overlay').classList.add('open');
+    document.getElementById('filtro-popup').classList.add('open');
+    document.getElementById('filtro-input').focus();
+  }
+
+  function fecharFiltro() {
+    document.getElementById('filtro-overlay').classList.remove('open');
+    document.getElementById('filtro-popup').classList.remove('open');
+    filtroAtivo = null;
+  }
+
+  function aplicarFiltro() {
+    const valor = document.getElementById('filtro-input').value.toLowerCase().trim();
+    
+    if (!valor) {
+      alert('Digite algo para filtrar');
+      return;
+    }
+
+    valorFiltro = valor;
+
+    vendasExibidas = todasAsVendas.filter(venda => {
+      switch(filtroAtivo) {
+        case 'data':
+          return new Date(venda.data).toLocaleDateString('pt-BR').includes(valor);
+        case 'produto':
+          return venda.produto.toLowerCase().includes(valor);
+        case 'custo':
+          return venda.custo.toString().includes(valor);
+        case 'preco':
+          return venda.preco_venda.toString().includes(valor);
+        case 'cupom':
+          return (venda.cupom || '').toLowerCase().includes(valor);
+        case 'comissao':
+          return venda.comissao.toString().includes(valor);
+        case 'lucro':
+          return venda.lucro_liquido.toString().includes(valor);
+        default:
+          return true;
+      }
+    });
+
+    if (vendasExibidas.length > 0) {
+      document.getElementById('filtro-ativo').style.display = 'block';
+      document.getElementById('filtro-ativo').innerHTML = `🔍 Filtrado (${vendasExibidas.length} resultado${vendasExibidas.length !== 1 ? 's' : ''}) <span onclick="limparFiltro()" style="margin-left: 8px; cursor: pointer;">✕</span>`;
+    }
+
+    renderizarVendas(vendasExibidas);
+    fecharFiltro();
+  }
+
+  function limparFiltro() {
+    filtroAtivo = null;
+    valorFiltro = null;
+    vendasExibidas = [...todasAsVendas];
+    document.getElementById('filtro-ativo').style.display = 'none';
+    renderizarVendas(vendasExibidas);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('filtro-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') aplicarFiltro();
+    });
+  });
+
   async function abrirModalEditar(id) {
     try {
       const res = await fetch(`${API_BASE}/vendas/${id}`, {
@@ -1122,7 +1307,6 @@
     btn.disabled = false;
   }
 
-  // ============ DELETAR VENDA ============
   function abrirModalDeletar(id) {
     document.getElementById('delete-id').value = id;
     document.getElementById('modal-deletar').classList.add('open');
@@ -1203,7 +1387,6 @@
     el.className = `message show ${tipo}`;
   }
 
-  // ============ DELETAR RESUMO ============
   function abrirModalDeletarResumo(id) {
     document.getElementById('delete-resumo-id').value = id;
     document.getElementById('modal-deletar-resumo').classList.add('open');
@@ -1241,7 +1424,6 @@
     window.location.href = '/?logout=1';
   }
 
-  // Carregar dados ao iniciar
   carregarDados();
 </script>
 

@@ -1,7 +1,3 @@
-// ==========================================
-// ProdSmart — Servidor Node.js + Express
-// ==========================================
-
 const express = require('express');
 const mysql = require('mysql2/promise');
 const bcryptjs = require('bcryptjs');
@@ -11,17 +7,9 @@ require('dotenv').config();
 
 const app = express();
 
-// ==========================================
-// MIDDLEWARE
-// ==========================================
-
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-
-// ==========================================
-// POOL DE CONEXÃO MYSQL
-// ==========================================
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -33,9 +21,6 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// ==========================================
-// MIDDLEWARE DE AUTENTICAÇÃO JWT
-// ==========================================
 
 function verificarToken(req, res, next) {
   const token = req.headers['authorization']?.split(' ')[1];
@@ -52,10 +37,6 @@ function verificarToken(req, res, next) {
     next();
   });
 }
-
-// ==========================================
-// ROTAS DE AUTENTICAÇÃO
-// ==========================================
 
 app.post('/api/login', async (req, res) => {
   try {
@@ -96,10 +77,6 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ erro: 'Erro no servidor' });
   }
 });
-
-// ==========================================
-// ROTAS DE CUPONS
-// ==========================================
 
 app.get('/api/cupons', verificarToken, async (req, res) => {
   try {
@@ -166,10 +143,6 @@ app.post('/api/cupons', verificarToken, async (req, res) => {
   }
 });
 
-// ==========================================
-// ROTAS DE VENDAS
-// ==========================================
-
 app.post('/api/vendas', verificarToken, async (req, res) => {
   let conn;
   try {
@@ -188,7 +161,6 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
     let comissao = 0;
     let lucro_liquido = lucro_bruto;
 
-    // Validar cupom se fornecido
     if (cupom && cupom.trim()) {
       conn = await pool.getConnection();
       const [cupons] = await conn.query(
@@ -206,7 +178,6 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
       }
     }
 
-    // Inserir venda
     if (!conn) conn = await pool.getConnection();
     
     await conn.query(
@@ -248,7 +219,6 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
   }
 });
 
-// GET todas as vendas
 app.get('/api/vendas', verificarToken, async (req, res) => {
   try {
     const conn = await pool.getConnection();
@@ -268,7 +238,6 @@ app.get('/api/vendas', verificarToken, async (req, res) => {
   }
 });
 
-// GET uma venda específica
 app.get('/api/vendas/:id', verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -295,7 +264,6 @@ app.get('/api/vendas/:id', verificarToken, async (req, res) => {
   }
 });
 
-// UPDATE uma venda
 app.put('/api/vendas/:id', verificarToken, async (req, res) => {
   let conn;
   try {
@@ -313,7 +281,6 @@ app.put('/api/vendas/:id', verificarToken, async (req, res) => {
     let comissao = 0;
     let lucro_liquido = lucro_bruto;
 
-    // Validar cupom se fornecido
     if (cupom && cupom.trim()) {
       conn = await pool.getConnection();
       const [cupons] = await conn.query(
@@ -328,7 +295,6 @@ app.put('/api/vendas/:id', verificarToken, async (req, res) => {
       }
     }
 
-    // Atualizar venda
     if (!conn) conn = await pool.getConnection();
     
     const [result] = await conn.query(
@@ -374,7 +340,6 @@ app.put('/api/vendas/:id', verificarToken, async (req, res) => {
   }
 });
 
-// DELETE uma venda
 app.delete('/api/vendas/:id', verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -423,10 +388,6 @@ app.get('/api/vendas/semana/:inicio/:fim', verificarToken, async (req, res) => {
     res.status(500).json({ erro: 'Erro ao listar vendas' });
   }
 });
-
-// ==========================================
-// ROTAS DE RESUMO SEMANAL
-// ==========================================
 
 app.get('/api/resumo/semanal', verificarToken, async (req, res) => {
   try {
@@ -521,7 +482,6 @@ app.get('/api/resumo/historico', verificarToken, async (req, res) => {
   }
 });
 
-// DELETE um resumo semanal
 app.delete('/api/resumo/:id', verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -548,17 +508,10 @@ app.delete('/api/resumo/:id', verificarToken, async (req, res) => {
   }
 });
 
-// ==========================================
-// ROTA DE HEALTH CHECK
-// ==========================================
-
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', servidor: 'ProdSmart ativo' });
 });
 
-// ==========================================
-// INICIAR SERVIDOR
-// ==========================================
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
