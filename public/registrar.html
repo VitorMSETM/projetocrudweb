@@ -491,12 +491,12 @@
       </div>
 
       <div class="preview" id="preview-lucro">
-        <div class="preview-label">Seu lucro (75%)</div>
+        <div class="preview-label" id="preview-label-lucro">Seu lucro (100%)</div>
         <div class="preview-value" id="preview-valor">R$ 0,00</div>
       </div>
 
       <div class="preview warning" id="preview-comissao" style="display: none;">
-        <div class="preview-label">Comissão influenciador (25%)</div>
+        <div class="preview-label" id="preview-label-comissao">Comissão influenciador (0%)</div>
         <div class="preview-value" id="preview-comissao-valor">R$ 0,00</div>
       </div>
 
@@ -558,6 +558,7 @@
   const API_BASE = '/api';
   let token = localStorage.getItem('auth_token');
   let cupomValido = false;
+  let cupomComissaoPercentual = 0;
   let cuponsValidos = [];
 
   if (!token) {
@@ -600,31 +601,48 @@
     const lucrobruto = preco - custo;
     const preview = document.getElementById('preview-lucro');
     const previewComissao = document.getElementById('preview-comissao');
+    const previewLabelLucro = document.getElementById('preview-label-lucro');
+    const previewLabelComissao = document.getElementById('preview-label-comissao');
 
     if (lucrobruto < 0) {
       preview.classList.add('danger');
       document.getElementById('preview-valor').textContent = formatarMoeda(lucrobruto);
       document.getElementById('preview-valor').style.color = '#fca5a5';
+      previewLabelLucro.textContent = 'Seu lucro (100%)';
     } else if (lucrobruto === 0) {
       preview.style.display = 'none';
+      previewComissao.style.display = 'none';
     } else {
       preview.classList.remove('danger');
       document.getElementById('preview-valor').style.color = '#6ee7b7';
 
-      if (cupom && cupomValido) {
-        const comissao = lucrobruto * 0.25;
-        const lucroLiq = lucrobruto * 0.75;
+      if (cupom && cupomValido && cupomComissaoPercentual > 0) {
+        const percentualDecimal = cupomComissaoPercentual / 100;
+        const comissao = lucrobruto * percentualDecimal;
+        const lucroLiq = lucrobruto * (1 - percentualDecimal);
 
         document.getElementById('preview-valor').textContent = formatarMoeda(lucroLiq);
+        previewLabelLucro.textContent = `Seu lucro (${(100 - cupomComissaoPercentual).toFixed(0)}%)`;
+        
         document.getElementById('preview-comissao-valor').textContent = formatarMoeda(comissao);
+        previewLabelComissao.textContent = `Comissão influenciador (${cupomComissaoPercentual.toFixed(0)}%)`;
         previewComissao.style.display = 'block';
       } else {
         document.getElementById('preview-valor').textContent = formatarMoeda(lucrobruto);
+        previewLabelLucro.textContent = 'Seu lucro (100%)';
         previewComissao.style.display = 'none';
       }
 
       preview.style.display = 'block';
     }
+
+    console.log('calcularLucro() executado:', {
+      lucrobruto,
+      cupom,
+      cupomValido,
+      cupomComissaoPercentual,
+      comissaoDisplayed: previewComissao.style.display
+    });
   }
 
   async function validarCupom() {
@@ -633,6 +651,7 @@
 
     if (!cupom) {
       cupomValido = false;
+      cupomComissaoPercentual = 0;
       statusEl.style.display = 'none';
       calcularLucro();
       return;
@@ -647,11 +666,15 @@
       cupomValido = data.valido;
 
       if (cupomValido) {
+        cupomComissaoPercentual = parseFloat(data.cupom.comissao_percentual);
+        console.log('✓ Cupom válido:', { cupom, percentual: cupomComissaoPercentual, influenciador: data.cupom.influenciador });
         statusEl.innerHTML = `
           <div class="check-icon valid">✓</div>
           <span style="color: #6ee7b7;">Cupom válido — ${data.cupom.influenciador}</span>
         `;
       } else {
+        cupomComissaoPercentual = 0;
+        console.log('✗ Cupom inválido:', cupom);
         statusEl.innerHTML = `
           <div class="check-icon invalid">✗</div>
           <span style="color: #fca5a5;">Cupom inválido</span>
@@ -659,10 +682,14 @@
       }
 
       statusEl.style.display = 'flex';
+      console.log('Estado antes de calcularLucro:', { cupomValido, cupomComissaoPercentual });
       calcularLucro();
 
     } catch (err) {
       console.error('Erro ao validar cupom:', err);
+      cupomValido = false;
+      cupomComissaoPercentual = 0;
+      calcularLucro();
     }
   }
 
@@ -774,6 +801,7 @@
     document.getElementById('preview-lucro').style.display = 'none';
     document.getElementById('preview-comissao').style.display = 'none';
     cupomValido = false;
+    cupomComissaoPercentual = 0;
   }
 
   function mostrarMensagem(msg, tipo) {

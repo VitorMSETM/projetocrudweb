@@ -100,8 +100,8 @@ app.get('/api/cupons/:cupom', verificarToken, async (req, res) => {
     
     const conn = await pool.getConnection();
     const [cupons] = await conn.query(
-      'SELECT cupom, influenciador, comissao_percentual FROM cupons WHERE UPPER(cupom) = UPPER(?) AND ativo = 1',
-      [cupom]
+      'SELECT cupom, influenciador, comissao_percentual FROM cupons WHERE cupom = ? AND ativo = 1',
+      [cupom.toUpperCase()]
     );
     conn.release();
 
@@ -161,24 +161,34 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
     let comissao = 0;
     let lucro_liquido = lucro_bruto;
 
-    if (cupom && cupom.trim()) {
-      conn = await pool.getConnection();
+    conn = await pool.getConnection();
+
+    if (cupom && cupom.trim() !== '') {
+      console.log(`🔍 Buscando cupom: ${cupom}`);
+      
       const [cupons] = await conn.query(
-        'SELECT comissao_percentual FROM cupons WHERE UPPER(cupom) = UPPER(?) AND ativo = 1',
-        [cupom]
+        'SELECT comissao_percentual FROM cupons WHERE cupom = ? AND ativo = 1',
+        [cupom.toUpperCase()]
       );
 
       if (cupons.length > 0) {
-        const percentual = cupons[0].comissao_percentual / 100;
-        comissao = lucro_bruto * percentual;
-        lucro_liquido = lucro_bruto * (1 - percentual);
-        console.log(`✓ Cupom ${cupom} validado. Comissão: ${comissao}`);
+        const percentual = cupons[0].comissao_percentual;
+        const percentualDecimal = percentual / 100;
+        comissao = lucro_bruto * percentualDecimal;
+        lucro_liquido = lucro_bruto - comissao;
+        
+        console.log(`✓ Cupom ${cupom} validado!`);
+        console.log(`  Percentual: ${percentual}%`);
+        console.log(`  Lucro bruto: R$ ${lucro_bruto.toFixed(2)}`);
+        console.log(`  Comissão: R$ ${comissao.toFixed(2)}`);
+        console.log(`  Lucro líquido: R$ ${lucro_liquido.toFixed(2)}`);
       } else {
-        console.log(`✗ Cupom ${cupom} não validado, tratando como sem cupom`);
+        console.log(`✗ Cupom ${cupom} não encontrado ou inativo`);
+        lucro_liquido = lucro_bruto; // Sem cupom válido
       }
+    } else {
+      console.log('ℹ️  Nenhum cupom informado');
     }
-
-    if (!conn) conn = await pool.getConnection();
     
     await conn.query(
       `INSERT INTO prodsmart 
@@ -189,15 +199,15 @@ app.post('/api/vendas', verificarToken, async (req, res) => {
         produto,
         custoNum,
         precoNum,
-        cupom || null,
+        (cupom && cupom.trim() !== '') ? cupom.toUpperCase() : null,
         parseFloat(comissao.toFixed(2)),
         parseFloat(lucro_liquido.toFixed(2))
       ]
     );
 
-    console.log('Venda registrada com sucesso');
+    conn.release();
 
-    if (conn) conn.release();
+    console.log('Venda registrada com sucesso');
 
     res.json({
       sucesso: true,
@@ -281,21 +291,20 @@ app.put('/api/vendas/:id', verificarToken, async (req, res) => {
     let comissao = 0;
     let lucro_liquido = lucro_bruto;
 
-    if (cupom && cupom.trim()) {
-      conn = await pool.getConnection();
+    conn = await pool.getConnection();
+
+    if (cupom && cupom.trim() !== '') {
       const [cupons] = await conn.query(
-        'SELECT comissao_percentual FROM cupons WHERE UPPER(cupom) = UPPER(?) AND ativo = 1',
-        [cupom]
+        'SELECT comissao_percentual FROM cupons WHERE cupom = ? AND ativo = 1',
+        [cupom.toUpperCase()]
       );
 
       if (cupons.length > 0) {
         const percentual = cupons[0].comissao_percentual / 100;
         comissao = lucro_bruto * percentual;
-        lucro_liquido = lucro_bruto * (1 - percentual);
+        lucro_liquido = lucro_bruto - comissao;
       }
     }
-
-    if (!conn) conn = await pool.getConnection();
     
     const [result] = await conn.query(
       `UPDATE prodsmart 
@@ -306,7 +315,7 @@ app.put('/api/vendas/:id', verificarToken, async (req, res) => {
         produto,
         custoNum,
         precoNum,
-        cupom || null,
+        (cupom && cupom.trim() !== '') ? cupom.toUpperCase() : null,
         parseFloat(comissao.toFixed(2)),
         parseFloat(lucro_liquido.toFixed(2)),
         id
